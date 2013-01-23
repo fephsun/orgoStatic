@@ -36,9 +36,8 @@ jq(document).ready(function() {
     });
     
     //Performs find-and-replace on bigMolecule divs, making the image larger.
-    $(".bigMolecule").each(function(){
-        out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
-        $(this).html(out);
+    //Yeah, there's only one, but I'm too lazy to change the "each".
+    $("#bigMolecule").each(function(){
         $(this).hover(
         function(){
             //Destroy the timeout created when you stopped hovering over the small molecule.
@@ -52,24 +51,36 @@ jq(document).ready(function() {
     
     //Makes the bigMolecule svg show up when you hover over the corresponding regular molecule.
     $(".molecule, #target").each(function(){
-        var bigSelector = "#"+$(this).attr('id')+"Big";
+        var bigSelector = "#bigMolecule";
         $(this).hover(
         function(){
             //What happens when mouse enters area
-            $(bigSelector).css('left', '100px');
+            //Wait for a few seconds, then show the big molecule
+            if ($(this).html().length < 5){
+                //Sorta hackish way of testing whether anything is in the molecule div
+                return
+            }
+            var fadeIn = setTimeout(function(element){
+                //Scope sucks.  This is the only way.
+                return function(){
+                    out=$(element).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
+                    $(bigSelector).css('left', '400px');
+                    $(bigSelector).html(out);
+                };
+            }(this), 1500);
+            $(this).data('fadeIn', fadeIn)
         },
         function(){
             //What happens when mouse leaves area
             //Set a timeout for disappearing the bigMolecule
-            if ($(bigSelector).is(':hover')) {}
-            else {
-                var timeoutId = setTimeout(function(){
-                    $(bigSelector).css('left', '-9999px');
-                }, 100);
+            clearTimeout($(this).data('fadeIn'));
+            var timeoutId = setTimeout(function(){
+                $(bigSelector).css('left', '-9999px');
+            }, 100);
             $(bigSelector).data('timeoutId', timeoutId); 
                 
             }
-        });
+        );
     });
     
     //For typing in autocompleted reagents
@@ -131,6 +142,7 @@ jq(document).ready(function() {
             },
         });
     }
+
     
 
 //Create a sidebar reagent with the user input.
@@ -254,7 +266,18 @@ jq(document).ready(function() {
     return "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+string+"\">"+(html.substr(0, html.length-2))+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
 }*/
 });
-
+    
+showAnswer = function(){
+    //If user clicks the answer button, make a AJAX request and get the answer.
+    $.ajax({
+        type: "GET",
+        url: "/orgo/api/showSingleStepAnswer/",
+        success: function(data) {
+            $("#reactionsHere").html(data);
+            $("#productMolecule").html($("#target").html());
+        }
+    });
+}
 
 var updateReagents;
 

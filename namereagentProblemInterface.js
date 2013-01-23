@@ -34,6 +34,7 @@ jq(document).ready(function() {
             });
         }
     });
+
     
     //
     
@@ -98,7 +99,12 @@ jq(document).ready(function() {
         });
     }
     
+
+};
+    
 });
+
+
 
 
 var updateReagents;
