@@ -12,25 +12,46 @@
     //Generic function to plumb arrows, given list of (idnumber, idnumber, reagentstring)        done
 
 var jq = jQuery.noConflict();
-
+var state = "Normal";
+var pk = 0; //Gets changed before chat starts.
 
 jq(document).ready(function() {
     
+    var isSolution = false;
     
+    //For making a link display the solution
+    $("#solutionDisplay").click(function() {
+        $.ajax({
+            type: "GET",
+            url: "/orgo/api/displaySolution/",
+            data: {},
+            success: function(data) {
+                drawAllTheThings(data);
+                isSolution = true;
+            },
+        });
+    });
     
     
     //For drawing stuff upon initialization
-    $.ajax({
-        type: "GET",
-        url: "/orgo/api/getSynthesisData/",
-        data: {},
-        success: function(data) {
-            drawAllTheThings(data);
-        },
-    });
+    var redrawProblem = function() {
+        $.ajax({
+            type: "GET",
+            url: "/orgo/api/getSynthesisData/",
+            data: {},
+            success: function(data) {
+                drawAllTheThings(data);
+            },
+        });
+    }
+    
+    redrawProblem();
 
     jsPlumb.bind("ready", function() {
         //When you scroll the left bar, the jsplumb stuff should be redrawn
+        //$('#leftbar').scroll(function () {
+        //    jsPlumb.repaintEverything();
+        //});
         $('#leftbar').scroll(function () {
             jsPlumb.repaintEverything();
         });
@@ -67,8 +88,10 @@ jq(document).ready(function() {
     
     
     
-    var successUpdate = function(success) {                
-        if (success)
+    var successUpdate = function(success) {
+        if (success == "solution")
+            $("#successbox").html("<div style=\"background-color:#FFFFFF\"><h2>Solution:</h2></div>");
+        else if (success)
             $("#successbox").html("<div style=\"background-color:#00FF00\"><h2>SUCCESS!</h2></div>");
         else
             $("#successbox").html("<div style=\"background-color:#FFFFFF\"><h2>Unsolved</h2></div>");
@@ -99,16 +122,21 @@ jq(document).ready(function() {
             htmlToAddToChart += "</div><br />";
         }
         //put the constructed html in #leftbar
-        $("#wideleftbar").html("");
-        $("#wideleftbar").append(htmlToAddToChart);
+        $("#leftbar").html("");
+        $("#leftbar").append(htmlToAddToChart);
         //For making molecules and reactions draggable
         $( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100});
-        //Molecules are droppable, too
+        //Molecules are droppable
         $(".molecule").droppable({
             drop: function(event, ui) {
             
+                if (isSolution) {
+                    isSolution = false;
+                    redrawProblem();
+                    jsPlumb.repaintEverything();
+                }
                 
-                if (ui.draggable.hasClass("molecule")) {
+                else if (ui.draggable.hasClass("molecule")) {
                     $.ajax({
                         type: "POST",
                         url: "/orgo/api/addMoleculeToMolecule/",
@@ -119,7 +147,7 @@ jq(document).ready(function() {
                         },
                     });
                 }
-                if (ui.draggable.hasClass("reagent")) {
+                else if (ui.draggable.hasClass("reagent")) {
                     $.ajax({
                         type: "POST",
                         url: "/orgo/api/addReagentToMolecule/",
@@ -189,26 +217,32 @@ jq(document).ready(function() {
             
             //[x[0] for each (x in currentMolecules)]
             
+            var currentMoleculeIndices = []
+            //var s = ""
+            for (var j=0; j<currentMolecules.length; j++) {
+                currentMoleculeIndices.push(currentMolecules[j][0]);
+            //    s +=  currentMolecules[j][0]+",";
+            }
+            
             //[ [arrow[0], svgGet(arrow[0]), ind] for each (arrow in arrows) if ([x[0] for each (x in currentMolecules)].indexOf(arrow[0])==-1)  ]
-            toAdd = []
-            console.log("Loop 1.");
+            var toAdd = []
             for (var i=0; i<arrows.length; i++) {
-                var a = arrows[i][1]
+                var aP = arrows[i][1]; //arrow product
+                var aR = arrows[i][0]; //arrow reactant
                 
-                currentMoleculeIndices = []
-                s = ""
-                
-                console.log("Loop 2.");
-                for (var j=0; j<currentMolecules.length; j++) {
-                    currentMoleculeIndices.push(currentMolecules[j][0]);
-                    s +=  currentMolecules[j][0]+",";
+                var toAddContents = []
+                for (var j=0; j<toAdd.length; j++) {
+                    toAddContents.push(toAdd[j][0]);
                 }
+
                 
-                //If the current arrow's product is not in the current list, add it
-                if (currentMoleculeIndices.indexOf(a) == -1)
-                    toAdd.push([a, svgGet(a), ind]);
+                //If the current arrow's product is not in the current list AND not in toAdd[any][0],
+                //AND the current arrow's reactant IS in the current list,
+                //add it
+                if ((currentMoleculeIndices.indexOf(aP) == -1) && (toAddContents.indexOf(aP) == -1) && !(currentMoleculeIndices.indexOf(aR) == -1))
+                    toAdd.push([aP, svgGet(aP), ind]);
                 else
-                    console.log("Arrow product "+a+" is not in current list, "+s);
+                    console.log("Arrow product "+aP+" is not in current list, "+s);
             }
             
             if (ind > 10)
@@ -268,16 +302,20 @@ jq(document).ready(function() {
                 var conn = jsPlumb.connect({
                     source:molecule1,  // just pass in the current node in the selector for source 
                     target:molecule2,
-                    parameters:{"reagents":(arrows[i][2])},
                     // here we supply a different anchor for source and for target, and we get the element's "data-shape"
                     // attribute to tell us what shape we should use, as well as, optionally, a rotation value.
                     anchors:[
                         [ "Perimeter", {shape:"rectangle"}],
                         [ "Perimeter", {shape:"rectangle"}]
-                    ],       
+                    ],
+                    overlays:[
+                        [ "Label", {label:(arrows[i][2]), id:"label"}]
+                    ],
+                    enabled:false,
+                    endpoint:["Dot", {radius:1}],
                 });
-                console.log("...");
-                conn.connection.getOverlay("label").setLabel(conn.getParameters().reagents);
+                //console.log("...");
+                //conn.getOverlay("label").setLabel(conn.getParameters().reagents);
                 console.log("blah");
             }
         });
@@ -344,10 +382,84 @@ jq(document).ready(function() {
         });
     }
     
+    //For chat functionality.    
+    $("#submit").click(function(){
+        if (state =! "Chatting") {
+            return;
+        }
+        //Submit a new message to the server.
+        $.ajax({
+            type: "POST",
+            url: "/orgo/chat/helpeechatpoll/",
+            data: {'PK': pk,
+                   'message': $('input:text').val()},
+            success: update
+        });
+        //Reset the text input.
+        $('input:text').val("");
+    });
+    
 
 });
 
 
 var updateReagents;
 
+function askForHelp() {
+    $("#chatbox").css('margin-left', 'auto');
+    $("#chatbox").css('margin-right', 'auto');
+    $.ajax({
+        type: "GET",
+        url: "/orgo/chat/askforhelp/",
+        success: function(data) {
+            $("#helpbox").html(data+" people waiting for help, including you");
+        }
+    });
+    setTimeout(keepPolling, 3000);
+}
+
+function keepPolling() {
+    $.ajax({
+        type: "GET",
+        url: "/orgo/chat/helpeepoll/",
+        success: function(data) {
+            //$("#allOut").html(data);
+            dataObject = jQuery.parseJSON(data);
+            if (dataObject.success){
+                $("#helpbox").html("Success!  Helped by "+dataObject.helper+"<br / >");
+                state = "Chatting";
+                pk = dataObject.chatPK;
+                getChat();
+            } else {
+                $("#helpbox").html(dataObject.queueSize+" people waiting for help, including you");
+                setTimeout(keepPolling, 3000);
+            }
+
+        }
+    });
+}
+
+function getChat() {
+    //Gets chat messages from the server.
+    $.ajax({
+        type: "POST",
+        url: "/orgo/chat/helpeechatpoll/",
+        data: {'PK': pk},
+        success: update
+    });
+    setTimeout(getChat, 3000);
+}
+
+function update(data) {
+    //$("#allOut").html(data);
+    jsonObject = $.parseJSON(data);
+    if (!jsonObject['open']) {
+        $("#helpbox").html("Session dropped.  Did the other user log out?");
+        state = "Normal";
+        return;
+    }
+    for (i=0; i<jsonObject['length']; i++) {
+        $("#helpbox").append(jsonObject[i] + "<br / >");
+    }
+}
 
