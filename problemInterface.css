@@ -9,7 +9,7 @@ body {
     max-height: 100px;
     overflow-y: auto;
     /* prevent horizontal scrollbar */
-    overflow-x: hidden;
+    overflow-x: hidden; 
 }
 * html .ui-autocomplete {
     height: 100px;
@@ -97,11 +97,10 @@ ul {
     margin-bottom:10px;
     background-color:#FFFFFF;
 }
-#topbar   { width: 910px; height: 95px; padding: 0px; margin-top:10px; margin-bottom:10px; margin-left:auto; margin-right:auto; background-color:#FFFFFF;}
-#main     { width: 910px; height: 500px; padding: 0px; margin-top:0px; margin-bottom:0px; margin-left:auto; margin-right:auto; background-color:#000000; }
+#topbar   { width: 960px; height: 95px; padding: 0px; margin-top:10px; margin-bottom:10px; margin-left:auto; margin-right:auto; background-color:#FFFFFF;}
+#main     { width: 960px; height: 500px; padding: 0px; margin-top:0px; margin-bottom:0px; margin-left:auto; margin-right:auto; background-color:#000000; }
 #rightbar { width: 250px; height: 500px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:10px; margin-right:0px; background-color:#FFFFFF; overflow:auto;}
-#leftbar  { width: 650px; height: 500px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; background-color:#FFFFFF; overflow:auto; overflow-x:auto}
-
+#leftbar  { width: 700px; height: 500px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; background-color:#FFFFFF; overflow:auto; overflow-x:auto}
 #chatbox {
     position: fixed;
     bottom: 0px;
@@ -117,7 +116,6 @@ ul {
     height: 70px;
     overflow: auto;
 }
-
 .box { 
     width:135px; 
     height:20px; 
