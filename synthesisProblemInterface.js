@@ -461,5 +461,6 @@ function update(data) {
     for (i=0; i<jsonObject['length']; i++) {
         $("#helpbox").append(jsonObject[i] + "<br / >");
     }
+    $("#helpbox").scrollTop($("#helpbox").height());
 }
 
