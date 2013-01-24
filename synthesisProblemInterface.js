@@ -155,6 +155,7 @@ jq(document).ready(function() {
                                'moleculeOn': $(this).attr("id")},
                         success: function(data) {
                             drawAllTheThings(data);
+                            console.log("Reagent string sent to ajax request: "+ui.draggable.attr("reagentString"));
                         },
                     });
                 }
