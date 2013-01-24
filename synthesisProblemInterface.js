@@ -1,15 +1,3 @@
-//Be able to read user input
-//Return data about what was dragged onto what
-    //Cases: molecule dragged onto another molecule --> create new step producing mixture of the two molecules, with reaction having occurred if applicable
-    //         reagents dragged onto a molecule --> create new step applying those reagents to that molecule
-//Server-side: return a new JSON object of molecules, reaction connections --> redraw
-//               check if the problem is completed yet --> return a boolean --> output success! if relevant.
-
-//Things to write to make this happen:
-    //Molecules are droppable --> two Ajax functions, depending on what is dragged onto them    done
-    //Ajax GET request, at beginning --> initial drawing of stuff, ALSO target molecule            --NO, target molecule is rendered by django.     done
-    //Generic function to produce divs, given list of (idnumber, SVG)                            done
-    //Generic function to plumb arrows, given list of (idnumber, idnumber, reagentstring)        done
 
 var jq = jQuery.noConflict();
 var state = "Normal";
