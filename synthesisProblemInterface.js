@@ -14,10 +14,16 @@
 var jq = jQuery.noConflict();
 var state = "Normal";
 var pk = 0; //Gets changed before chat starts.
+var REFRESH = 1500; //Chat refresh time, in ms.
 
 jq(document).ready(function() {
     
+    //
     var isSolution = false;
+    
+    
+    //
+    
     
     //For making a link display the solution
     $("#solutionDisplay").click(function() {
@@ -58,7 +64,7 @@ jq(document).ready(function() {
 
         jsPlumb.importDefaults({
             Connector:"StateMachine",
-            PaintStyle:{ lineWidth:3, strokeStyle:"#000000"},
+            PaintStyle:{ lineWidth:3, strokeStyle:"#445566"},
             ConnectionOverlays : [
                 [ "Arrow", { 
                     location:1,
@@ -128,6 +134,7 @@ jq(document).ready(function() {
         $( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100});
         //Molecules are droppable
         $(".molecule").droppable({
+            greedy: true,
             drop: function(event, ui) {
             
                 if (isSolution) {
@@ -310,7 +317,7 @@ jq(document).ready(function() {
                         [ "Perimeter", {shape:"rectangle"}]
                     ],
                     overlays:[
-                        [ "Label", {label:(arrows[i][2]), id:"label"}]
+                        [ "Label", {label:((arrows[i][2] == "")? (""):("<span class=\"arrowLabel\">"+arrows[i][2]+"</span>")), id:"label"}]
                     ],
                     enabled:false,
                     endpoint:["Dot", {radius:1}],
@@ -383,21 +390,17 @@ jq(document).ready(function() {
         });
     }
     
+    $("#input").keydown(function(e){
+        //If the user presses the enter key (#13) while on the input box,
+        //automatically submit line.
+        if (e.keyCode == 13) {
+            submitLine();
+        }
+    });
+    
     //For chat functionality.    
     $("#submit").click(function(){
-        if (state =! "Chatting") {
-            return;
-        }
-        //Submit a new message to the server.
-        $.ajax({
-            type: "POST",
-            url: "/orgo/chat/helpeechatpoll/",
-            data: {'PK': pk,
-                   'message': $('#input').val()},
-            success: update
-        });
-        //Reset the text input.
-        $('#input').val("");
+        submitLine();
     });
     
 
@@ -406,9 +409,24 @@ jq(document).ready(function() {
 
 var updateReagents;
 
+function submitLine() {
+    if (state =! "Chatting") {
+        return;
+    }
+    //Submit a new message to the server.
+    $.ajax({
+        type: "POST",
+        url: "/orgo/chat/helpeechatpoll/",
+        data: {'PK': pk,
+               'message': $('#input').val()},
+        success: update
+    });
+    //Reset the text input.
+    $('#input').val("");
+}
+
 function askForHelp() {
-    $("#chatbox").css('margin-left', 'auto');
-    $("#chatbox").css('margin-right', 'auto');
+    $("#chatbox").css('margin-left', '100px');
     $.ajax({
         type: "GET",
         url: "/orgo/chat/askforhelp/",
@@ -416,7 +434,7 @@ function askForHelp() {
             $("#helpbox").html(data+" people waiting for help, including you");
         }
     });
-    setTimeout(keepPolling, 3000);
+    setTimeout(keepPolling, REFRESH);
 }
 
 function keepPolling() {
@@ -433,7 +451,7 @@ function keepPolling() {
                 getChat();
             } else {
                 $("#helpbox").html(dataObject.queueSize+" people waiting for help, including you");
-                setTimeout(keepPolling, 3000);
+                setTimeout(keepPolling, REFRESH);
             }
 
         }
@@ -448,7 +466,7 @@ function getChat() {
         data: {'PK': pk},
         success: update
     });
-    setTimeout(getChat, 3000);
+    setTimeout(getChat, REFRESH);
 }
 
 function update(data) {
@@ -457,6 +475,9 @@ function update(data) {
     if (!jsonObject['open']) {
         $("#helpbox").html("Session dropped.  Did the other user log out?");
         state = "Normal";
+        setTimeout(function(){
+            $("#chatbox").css('margin-left', '-9999px');
+            }, 3000);
         return;
     }
     for (i=0; i<jsonObject['length']; i++) {
@@ -464,8 +485,19 @@ function update(data) {
     }
     //Scroll to bottom.
     if (jsonObject['length'] != 0) {
-        $("#helpbox").scrollTop($("#helpbox").height());
+        $("#helpbox").scrollTop($("#helpbox").prop("scrollHeight")-$("#helpBox").height());
     }
+}
+
+function saveProblem() {
+    $.ajax({
+        type: "GET",
+        url: "/orgo/api/saveProblem",
+        success: function(data){
+            out=$("#namebox").html() + " Your problem has been saved.  Use id#"+data+" to access it.";
+        
+        }
+    });
 }
 
 
