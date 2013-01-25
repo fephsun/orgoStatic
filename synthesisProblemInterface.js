@@ -52,7 +52,7 @@ jq(document).ready(function() {
                     location:1,
                     id:"arrow",
                     length:10,
-                    foldback:0.5
+                    foldback:5
                 } ],
             ],
             Anchors : [ "TopCenter", "BottomCenter" ]
@@ -114,16 +114,27 @@ jq(document).ready(function() {
         $("#leftbar").append(htmlToAddToChart);
         //For making molecules and reactions draggable
         $( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100});
-        //Molecules are droppable
+        //The right bar is droppable, and triggers deletion of molecules
+        $("rightbar").droppable({
+            drop: function(event, ui) {
+                $.ajax({
+                    type: "POST",
+                    url: "/orgo/api/deleteMolecule/",
+                    data: {"moleculeID": ui.draggable.attr("id")},
+                    success: function(data) {
+                        drawAllTheThings(data);
+                    }
+                });
+            }
+        });
+        //Molecules are droppable, triggering addition of reagents or other molecules
         $(".molecule").droppable({
             drop: function(event, ui) {
-            
                 if (isSolution) {
                     isSolution = false;
                     redrawProblem();
                     jsPlumb.repaintEverything();
                 }
-                
                 else if (ui.draggable.hasClass("molecule")) {
                     $.ajax({
                         type: "POST",
@@ -298,7 +309,7 @@ jq(document).ready(function() {
                         [ "Perimeter", {shape:"rectangle"}]
                     ],
                     overlays:[
-                        [ "Label", {label:(arrows[i][2]), id:"label"}]
+                        [ "Label", {label:("<span class=\"arrowLabel\">" + arrows[i][2] + "</span>"), id:"label"}]
                     ],
                     enabled:false,
                     endpoint:["Dot", {radius:1}],
