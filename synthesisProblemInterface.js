@@ -264,7 +264,7 @@ var drawArrows = function(arrows) {
     
     
     jsPlumb.bind("ready", function() {
-        //jsPlumb.setSuspendDrawing(true);
+        jsPlumb.setSuspendDrawing(true);
         jsPlumb.detachAllConnections();
         for (var i = 0; i < arrows.length; i++) {        
             molecule1 = document.getElementById(String(arrows[i][0]));
@@ -317,10 +317,18 @@ function allSetup() {
         //$('#leftbar').scroll(function () {
         //    jsPlumb.repaintEverything();
         //});
+        jsPlumb.setAutomaticRepaint(true);
+        
         $('#leftbar').scroll(function () {
+<<<<<<< HEAD
             jsPlumb.setSuspendDrawing(true);
             jsPlumb.repaintEverything();
             jsPlumb.setSuspendDrawing(false, true);
+=======
+            //jsPlumb.setSuspendDrawing(true);
+            jsPlumb.repaintEverything();
+            //jsPlumb.setSuspendDrawing(false, true);
+>>>>>>> 9384e5733d1b6f2044ffb8badb396dad7111b33b
         });
 
         jsPlumb.importDefaults({
