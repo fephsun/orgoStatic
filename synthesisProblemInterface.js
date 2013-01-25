@@ -262,7 +262,9 @@ var moleculeListSort = function(molecules, arrows) {
 var drawArrows = function(arrows) {
     //clear existing jsplumb connections -- how to?
     
+    
     jsPlumb.bind("ready", function() {
+        //jsPlumb.setSuspendDrawing(true);
         jsPlumb.detachAllConnections();
         for (var i = 0; i < arrows.length; i++) {        
             molecule1 = document.getElementById(String(arrows[i][0]));
@@ -284,10 +286,12 @@ var drawArrows = function(arrows) {
                 enabled:false,
                 endpoint:["Dot", {radius:1}],
             });
+            conn.setAutomaticRepaint(true);
             //console.log("...");
             //conn.getOverlay("label").setLabel(conn.getParameters().reagents);
             console.log("blah");
         }
+        jsPlumb.setSuspendDrawing(false, true);
     });
 }
 
@@ -314,7 +318,9 @@ function allSetup() {
         //    jsPlumb.repaintEverything();
         //});
         $('#leftbar').scroll(function () {
+            jsPlumb.setSuspendDrawing(true);
             jsPlumb.repaintEverything();
+            jsPlumb.setSuspendDrawing(false, true);
         });
 
         jsPlumb.importDefaults({
@@ -399,6 +405,14 @@ function clientSetup() {
     //Close chat.
     $("#close").click(function(){
         $("#chatbox").css("margin-left", "-9999px");
+    });
+    
+    //Submit reagent when enter is pressed
+    $("#reagentTyperBox").keydown(function(e){
+        if (e.keyCode == 13) {
+            updateReagents();
+            $("#reagentTyperBox").val("");
+        }
     });
 }
 
