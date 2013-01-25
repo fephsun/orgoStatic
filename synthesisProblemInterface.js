@@ -1,15 +1,3 @@
-//Be able to read user input
-//Return data about what was dragged onto what
-    //Cases: molecule dragged onto another molecule --> create new step producing mixture of the two molecules, with reaction having occurred if applicable
-    //         reagents dragged onto a molecule --> create new step applying those reagents to that molecule
-//Server-side: return a new JSON object of molecules, reaction connections --> redraw
-//               check if the problem is completed yet --> return a boolean --> output success! if relevant.
-
-//Things to write to make this happen:
-    //Molecules are droppable --> two Ajax functions, depending on what is dragged onto them    done
-    //Ajax GET request, at beginning --> initial drawing of stuff, ALSO target molecule            --NO, target molecule is rendered by django.     done
-    //Generic function to produce divs, given list of (idnumber, SVG)                            done
-    //Generic function to plumb arrows, given list of (idnumber, idnumber, reagentstring)        done
 
 var jq = jQuery.noConflict();
 var state = "Normal";
@@ -70,7 +58,7 @@ jq(document).ready(function() {
                     location:1,
                     id:"arrow",
                     length:10,
-                    foldback:0.5
+                    foldback:5
                 } ],
             ],
             Anchors : [ "TopCenter", "BottomCenter" ]
@@ -132,17 +120,29 @@ jq(document).ready(function() {
         $("#leftbar").append(htmlToAddToChart);
         //For making molecules and reactions draggable
         $( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100});
-        //Molecules are droppable
+        //The right bar is droppable, and triggers deletion of molecules
+        $("#rightbar").droppable({
+            drop: function(event, ui) {
+                $.ajax({
+                    type: "POST",
+                    url: "/orgo/api/deleteMolecule/",
+                    data: {"moleculeID": ui.draggable.attr("id")},
+                    success: function(data) {
+                        drawAllTheThings(data);
+                        console.log("Post request successful.");
+		    }
+                });
+            }
+        });
+        //Molecules are droppable, triggering addition of reagents or other molecules
         $(".molecule").droppable({
             greedy: true,
             drop: function(event, ui) {
-            
                 if (isSolution) {
                     isSolution = false;
                     redrawProblem();
                     jsPlumb.repaintEverything();
                 }
-                
                 else if (ui.draggable.hasClass("molecule")) {
                     $.ajax({
                         type: "POST",
@@ -403,6 +403,11 @@ jq(document).ready(function() {
         submitLine();
     });
     
+    //Close chat.
+    $("#close").click(function(){
+        $("#chatbox").css("margin-left", "-9999px");
+    });
+    
 
 });
 
@@ -494,8 +499,8 @@ function saveProblem() {
         type: "GET",
         url: "/orgo/api/saveProblem",
         success: function(data){
-            out=$("#namebox").html() + " Your problem has been saved.  Use id#"+data+" to access it.";
-        
+            out="Problem saved. <br /> ID: "+data;
+            $("#savebox").html(out)
         }
     });
 }
