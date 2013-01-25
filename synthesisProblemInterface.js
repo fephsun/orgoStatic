@@ -392,11 +392,11 @@ jq(document).ready(function() {
             type: "POST",
             url: "/orgo/chat/helpeechatpoll/",
             data: {'PK': pk,
-                   'message': $('input:text').val()},
+                   'message': $('#input').val()},
             success: update
         });
         //Reset the text input.
-        $('input:text').val("");
+        $('#input').val("");
     });
     
 
@@ -461,5 +461,14 @@ function update(data) {
     for (i=0; i<jsonObject['length']; i++) {
         $("#helpbox").append(jsonObject[i] + "<br / >");
     }
+    //Scroll to bottom.
+    if (jsonObject['length'] != 0) {
+        $("#helpbox").scrollTop($("#helpbox").height());
+    }
 }
+
+
+
+
+
 
