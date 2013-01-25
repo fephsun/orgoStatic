@@ -320,15 +320,7 @@ function allSetup() {
         jsPlumb.setAutomaticRepaint(true);
         
         $('#leftbar').scroll(function () {
-<<<<<<< HEAD
-            jsPlumb.setSuspendDrawing(true);
             jsPlumb.repaintEverything();
-            jsPlumb.setSuspendDrawing(false, true);
-=======
-            //jsPlumb.setSuspendDrawing(true);
-            jsPlumb.repaintEverything();
-            //jsPlumb.setSuspendDrawing(false, true);
->>>>>>> 9384e5733d1b6f2044ffb8badb396dad7111b33b
         });
 
         jsPlumb.importDefaults({
