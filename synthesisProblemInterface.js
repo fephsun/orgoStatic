@@ -52,7 +52,7 @@ jq(document).ready(function() {
                     location:1,
                     id:"arrow",
                     length:10,
-                    foldback:5
+                    foldback:1
                 } ],
             ],
             Anchors : [ "TopCenter", "BottomCenter" ]
@@ -115,7 +115,8 @@ jq(document).ready(function() {
         //For making molecules and reactions draggable
         $( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100});
         //The right bar is droppable, and triggers deletion of molecules
-        $("rightbar").droppable({
+        $("#rightbar, #offscreen").droppable({
+            greedy: true,
             drop: function(event, ui) {
                 $.ajax({
                     type: "POST",
@@ -127,8 +128,14 @@ jq(document).ready(function() {
                 });
             }
         });
+        $("#leftbar").droppable({
+            greedy: true,
+            drop: function(event, ui) {
+            }
+        });
         //Molecules are droppable, triggering addition of reagents or other molecules
         $(".molecule").droppable({
+            greedy: true,
             drop: function(event, ui) {
                 if (isSolution) {
                     isSolution = false;
