@@ -262,7 +262,6 @@ var moleculeListSort = function(molecules, arrows) {
 var drawArrows = function(arrows) {
     //clear existing jsplumb connections -- how to?
     
-    
     jsPlumb.bind("ready", function() {
         jsPlumb.setSuspendDrawing(true);
         jsPlumb.detachAllConnections();
