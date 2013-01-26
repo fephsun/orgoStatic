@@ -70,10 +70,15 @@ var drawMolecules = function(moleculesSorted) {
         htmlToAddToChart += "<div id=\"cleared\">";
         for (var j=0; j<moleculesSorted[i].length; j++) {      //for molecule in row
             molecule = moleculesSorted[i][j]
+            var whetherIsStarting = ""
+            if (molecule[3])
+                whetherIsStarting = " class = 'starting'"
             //add a new div
             div = "<div id='" +
                     String(molecule[0]) + 
-                    "' class='molecule'>" + 
+                    "' class='molecule'" +
+                    whetherIsStarting +
+                    ">" + 
                     String(molecule[1]) + 
                     "</div>";
             htmlToAddToChart += div;
@@ -97,12 +102,9 @@ var drawMolecules = function(moleculesSorted) {
         hoverClass: 'drop_hover',
         accept: '.molecule',
         drop: function(event, ui) {
-
-            
-            //get rid of divs?
             
             //draw things
-            if (ui.draggable.hasClass("molecule")) {
+            if (ui.draggable.hasClass("molecule") && !(ui.draggable.hasClass("starting"))) {
                 try {
                     id = ui.draggable.attr("id");
                     $.ajax({
@@ -194,7 +196,7 @@ var moleculeListSort = function(molecules, arrows) {
     for (var i=0; i<molecules.length; i++) {
         m = molecules[i];
         if (arrowProducts.indexOf(m[0]) == -1) {
-            startingMolecules.push([m[0], m[1], 0]);
+            startingMolecules.push([m[0], m[1], 0, true]); //the "true" is to keep track of it being a starting molecule.
             console.log("Added to starting: "+m[0]);
         }
         else console.log("Not added to starting: "+m[0]);
@@ -210,7 +212,7 @@ var moleculeListSort = function(molecules, arrows) {
         return "null";
     }
     
-    
+    //This entire next block is devoted to finding out the row (an integer) at which to draw a molecule.
     var maxInd = 0;
     var rank = function(currentMolecules, ind) {
         //If the size of currentMolecules is equal to the size of molecules, return -- you're done
@@ -249,7 +251,7 @@ var moleculeListSort = function(molecules, arrows) {
             //AND the current arrow's reactant IS in the current list,
             //add it
             if ((currentMoleculeIndices.indexOf(aP) == -1) && (toAddContents.indexOf(aP) == -1) && !(currentMoleculeIndices.indexOf(aR) == -1))
-                toAdd.push([aP, svgGet(aP), ind]);
+                toAdd.push([aP, svgGet(aP), ind, false]);
             else
                 console.log("Arrow product "+aP+" is not in current list, "+s);
         }
