@@ -323,7 +323,7 @@ var moleculeListSort = function(molecules, arrows) {
             } 
         }
         //Add, to finalToAdd, anything in alsoToAdd which is not yet in finalToAdd
-        for (var k = 0; k < alsoToAdd.length; ++) {
+        for (var k = 0; k < alsoToAdd.length; k++) {
             if (finalToAdd.indexOf(alsoToAdd[k]) != -1) {
                 finalToAdd.push(alsoToAdd[k]);
             }
