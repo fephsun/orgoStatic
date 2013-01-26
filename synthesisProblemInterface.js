@@ -31,7 +31,11 @@ var drawAllTheThings = function(data) {
     //Redraw all the things
     
     drawMolecules(moleculeListSort(dataObject.molecules, dataObject.arrows));
-    drawArrows(dataObject.arrows);
+    try {
+        drawArrows(dataObject.arrows);
+    } catch(e) {
+        console.log("ERROR! In drawArrows(dataObject.arrows)");
+    }
     
     //Update with whether or not the user was successful
     successUpdate(dataObject.success);
@@ -50,9 +54,9 @@ var drawMolecules = function(moleculesSorted) {
         for (var j=0; j<moleculesSorted[i].length; j++) {      //for molecule in row
             molecule = moleculesSorted[i][j]
             //add a new div
-            div = "<div id=" +
+            div = "<div id='" +
                     String(molecule[0]) + 
-                    " class=\"molecule\">" + 
+                    "' class='molecule'>" + 
                     String(molecule[1]) + 
                     "</div>";
             htmlToAddToChart += div;
@@ -61,26 +65,49 @@ var drawMolecules = function(moleculesSorted) {
         //add a line break, or something
         htmlToAddToChart += "</div><br />";
     }
-    jsPlumb.detachAllConnections();
+    try {
+        jsPlumb.detachAllConnections();
+    } catch(e) {
+        console.log("ERROR! In jsPlumb.detachAllConnections()");
+    }
+    
+    
+    
     //put the constructed html in #leftbar
     $("#leftbar").html("");
     $("#leftbar").append(htmlToAddToChart);
     //For making molecules and reactions draggable
-    $( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100});
+    $( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100, drop: function(event, ui) {} });
     //The right bar is droppable, and triggers deletion of molecules
     $("#rightbar, #offscreen").droppable({
         greedy: true,
         drop: function(event, ui) {
+            tolerance: 'pointer'
+            hoverClass: 'drop_hover'
+            accept: '.molecule'
+            
+            //get rid of divs?
+            
+            //draw things
             if (ui.draggable.hasClass("molecule")) {
-                $.ajax({
-                    type: "POST",
-                    url: "/orgo/api/deleteMolecule/",
-                    data: {"moleculeID": ui.draggable.attr("id")},
-                    success: function(data) {
-                        drawAllTheThings(data);
-                        console.log("Post request successful.");
-                    }
-                });
+                try {
+                    id = ui.draggable.attr("id");
+                    $("#leftbar").html("");
+                    $.ajax({
+                        type: "POST",
+                        url: "/orgo/api/deleteMolecule/",
+                        data: {"moleculeID": id},
+                        success: function(data) {
+                            var afterWait = function() {
+                            drawAllTheThings(data);
+                            console.log("Post request successful.");
+                            }
+                            window.setTimeout(afterWait,100);
+                        }
+                    });
+                } catch(e) {
+                    console.log("ERROR! In rightbar/offscreen droppable.");
+                }
             }
         }
     });
@@ -96,7 +123,11 @@ var drawMolecules = function(moleculesSorted) {
             if (isSolution) {
                 isSolution = false;
                 redrawProblem();
-                jsPlumb.repaintEverything();
+                try{
+                    jsPlumb.repaintEverything();
+                } catch(e) {
+                    console.log("ERROR! 42 In jsPlumb.repaintEverything();");
+                }
             }
             else if (ui.draggable.hasClass("molecule")) {
                 $.ajax({
@@ -123,6 +154,7 @@ var drawMolecules = function(moleculesSorted) {
             }
         }
     });
+    updateBigMolecule();
 }
 
 
@@ -262,15 +294,12 @@ var moleculeListSort = function(molecules, arrows) {
 var drawArrows = function(arrows) {
     //clear existing jsplumb connections -- how to?
     
-    
     jsPlumb.bind("ready", function() {
+    
         jsPlumb.setSuspendDrawing(true);
-        jsPlumb.detachAllConnections();
         for (var i = 0; i < arrows.length; i++) {        
             molecule1 = document.getElementById(String(arrows[i][0]));
-            console.log(molecule1);
             molecule2 = document.getElementById(String(arrows[i][1]));
-            console.log(molecule2);
             var conn = jsPlumb.connect({
                 source:molecule1,  // just pass in the current node in the selector for source 
                 target:molecule2,
@@ -286,10 +315,8 @@ var drawArrows = function(arrows) {
                 enabled:false,
                 endpoint:["Dot", {radius:1}],
             });
-            conn.setAutomaticRepaint(true);
             //console.log("...");
             //conn.getOverlay("label").setLabel(conn.getParameters().reagents);
-            console.log("blah");
         }
         jsPlumb.setSuspendDrawing(false, true);
     });
@@ -312,31 +339,34 @@ function extractLast( term ) {
 
 //Start-up (document.ready) functions run by both the solver and the helper.
 function allSetup() {
-    jsPlumb.bind("ready", function() {
-        //When you scroll the left bar, the jsplumb stuff should be redrawn
-        //$('#leftbar').scroll(function () {
-        //    jsPlumb.repaintEverything();
-        //});
-        jsPlumb.setAutomaticRepaint(true);
-        
-        $('#leftbar').scroll(function () {
-            jsPlumb.repaintEverything();
-        });
+    try {
+        jsPlumb.bind("ready", function() {
+            
+            $('#leftbar').scroll(function () {
+                try {
+                    jsPlumb.repaintEverything();
+                } catch(e) {
+                    console.log("ERROR! 43 In jsPlumb.repaintEverything();");
+                }
+            });
 
-        jsPlumb.importDefaults({
-            Connector:"StateMachine",
-            PaintStyle:{ lineWidth:3, strokeStyle:"#445566"},
-            ConnectionOverlays : [
-                [ "Arrow", { 
-                    location:1,
-                    id:"arrow",
-                    length:10,
-                    foldback:1
-                } ],
-            ],
-            Anchors : [ "TopCenter", "BottomCenter" ]
+            jsPlumb.importDefaults({
+                Connector:"StateMachine",
+                PaintStyle:{ lineWidth:3, strokeStyle:"#445566"},
+                ConnectionOverlays : [
+                    [ "Arrow", { 
+                        location:1,
+                        id:"arrow",
+                        length:10,
+                        foldback:1
+                    } ],
+                ],
+                Anchors : [ "TopCenter", "BottomCenter" ]
+            });
         });
-    });
+    } catch(e) {
+        console.log("ERROR! In allSetup() ???");
+    }
 }
 
 
@@ -414,8 +444,38 @@ function clientSetup() {
             $("#reagentTyperBox").val("");
         }
     });
+    
+    //Make big molecules.
+    $("#bigMolecule").each(function(){
+        $(this).click(function(){
+            $(this).css("left", "-9999px");
+
+        });
+    });
+    
+    updateBigMolecule();
+    
+    
 }
 
+//Makes the bigMolecule svg show up when you hover over the corresponding regular molecule.
+function updateBigMolecule(){
+    $(".molecule, #target").each(function(){
+        var bigSelector = "#bigMolecule";
+        $(this).click(function(){
+            //What happens when mouse enters area
+            //Wait for a few seconds, then show the big molecule
+            if ($(this).html().length < 5){
+                //Sorta hackish way of testing whether anything is in the molecule div
+                return
+            }
+            out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
+            $(bigSelector).css('left', '400px');
+            $(bigSelector).html(out);
+
+        });
+    });
+}
 
 var updateReagents = function() {
     //Don't need to send anything back!
