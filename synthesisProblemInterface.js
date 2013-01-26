@@ -268,6 +268,7 @@ var moleculeListSort = function(molecules, arrows) {
     for (var i = 1; i <= maxInd; i++) {
     
         //[ [ triple for each (triple in rankedMolecules) if (triple[2] == i) ] ]
+        //alsoToAdd represents the next row to add to the output array.
         alsoToAdd = [];
         for(var j = 0; j < rankedMolecules.length; j++) {
             if (rankedMolecules[j][2] == i) {
@@ -278,12 +279,59 @@ var moleculeListSort = function(molecules, arrows) {
                 console.log(alsoToAdd);
             }
         }
-        output.push(alsoToAdd);
+        
+        //This bit of code: Rearranges the items in alsoToAdd so as to minimize arrow-crossing.
+        var prevToAdd = output[output.length-1]; //the previous row
+        var finalToAdd = [];
+        for (var j = 0; j < prevToAdd.length; j++) {
+            //Add, to finalToAdd, (the kth) item in alsoToAdd if it is at the end of any arrow starting with (the jth) element in prevToAdd
+            //This is kind of like a sort, so it might be time consuming. But we're O(n^3) from earlier, anyways. >.>
+            
+            var arrowProdsToCheck = []; //array will contain all products of arrows beginning with the jth element in prevToAdd
+            for (var l = 0; l < arrows.length; l++) {
+                if (arrows[l][0] == prevToAdd[j][0]) { //if the reactant is in the previous row, allow the product in array
+                    arrowProdsToCheck.push(arrows[l][1]);
+                }
+            } //end initialization of arrowProdsToCheck
+            
+            for (var k = 0; k < alsoToAdd.length; k++) {
+                //Check if: the kth item in alsoToAdd is --
+                    //not already in finalToAdd (automatic no) --this is important! some molecules are products of two arrows.
+                    //at the end of any arrow in arrowProdsToCheck (automatic yes, UNLESS the above)
+                    //if not any of the above, then default to don't add it
+                var shouldAddKthItem = false;
+                if (arrowProdsToCheck.indexOf(alsoToAdd[k][0]) != -1) { //it's in arrowProdsToCheck, so probably add it
+                    shouldAddKthItem = true;
+                    if (finalToAdd.indexOf(alsoToAdd[k]) != -1) { //check if it's already in finalToAdd, though; if it is, DON'T add it
+                        shouldAddKthItem = false;
+                    }
+                } 
+                
+                if (shouldAddKthItem) {
+                    finalToAdd.push(alsoToAdd[k]);
+                }
+            } 
+        }
+        //Add, to finalToAdd, anything in alsoToAdd which is not yet in finalToAdd
+        for (var k = 0; k < alsoToAdd.length; ++) {
+            if (finalToAdd.indexOf(alsoToAdd[k]) != -1) {
+                finalToAdd.push(alsoToAdd[k]);
+            }
+        }
+        
+        //output.push(alsoToAdd); //in case of bugs with finalToAdd, uncomment this
+        output.push(finalToAdd);
     }
     
     console.log("Finit molecule height: "+String(output.length));
     for(var i = 0; i<output.length; i++)
         console.log("Row length: "+String(output[i].length));
+    
+    
+    
+    
+    
+    
     
     return output
 }
