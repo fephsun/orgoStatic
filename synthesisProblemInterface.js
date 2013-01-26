@@ -30,11 +30,28 @@ var drawAllTheThings = function(data) {
     dataObject = jQuery.parseJSON(data);
     //Redraw all the things
     
-    drawMolecules(moleculeListSort(dataObject.molecules, dataObject.arrows));
+    
+    $("#leftbar").html("");
+    
+    try {
+        drawMolecules(moleculeListSort(dataObject.molecules, dataObject.arrows));
+    } catch(e) {
+        console.log("ERROR! In drawMolecules");
+    }
+    try {
+        jsPlumb.reset();
+    } catch(e) {
+        console.log("ERROR! In jsPlumb reset");
+    }
     try {
         drawArrows(dataObject.arrows);
     } catch(e) {
-        console.log("ERROR! In drawArrows(dataObject.arrows)");
+        console.log("ERROR! In drawArrows");
+    }
+    try {
+        jsPlumb.repaintEverything();
+    } catch(e) {
+        console.log("ERROR! In jsPlumb.repaintEverything()" + e.stack);
     }
     
     //Update with whether or not the user was successful
@@ -65,14 +82,9 @@ var drawMolecules = function(moleculesSorted) {
         //add a line break, or something
         htmlToAddToChart += "</div><br />";
     }
-    try {
-        jsPlumb.detachAllConnections();
-    } catch(e) {
-        console.log("ERROR! In jsPlumb.detachAllConnections()");
-    }
     
     
-    
+    $(".molecule").remove();
     //put the constructed html in #leftbar
     $("#leftbar").html("");
     $("#leftbar").append(htmlToAddToChart);
@@ -81,10 +93,11 @@ var drawMolecules = function(moleculesSorted) {
     //The right bar is droppable, and triggers deletion of molecules
     $("#rightbar, #offscreen").droppable({
         greedy: true,
+        tolerance: 'pointer',
+        hoverClass: 'drop_hover',
+        accept: '.molecule',
         drop: function(event, ui) {
-            tolerance: 'pointer'
-            hoverClass: 'drop_hover'
-            accept: '.molecule'
+
             
             //get rid of divs?
             
@@ -92,17 +105,14 @@ var drawMolecules = function(moleculesSorted) {
             if (ui.draggable.hasClass("molecule")) {
                 try {
                     id = ui.draggable.attr("id");
-                    $("#leftbar").html("");
                     $.ajax({
                         type: "POST",
                         url: "/orgo/api/deleteMolecule/",
                         data: {"moleculeID": id},
                         success: function(data) {
-                            var afterWait = function() {
+                            ui.draggable.remove();
                             drawAllTheThings(data);
                             console.log("Post request successful.");
-                            }
-                            window.setTimeout(afterWait,100);
                         }
                     });
                 } catch(e) {
@@ -343,11 +353,19 @@ var drawArrows = function(arrows) {
     //clear existing jsplumb connections -- how to?
     
     jsPlumb.bind("ready", function() {
-    
+        try {
         jsPlumb.setSuspendDrawing(true);
-        for (var i = 0; i < arrows.length; i++) {        
+        } catch(e) {
+        console.log("ERROR 52");
+        }
+        for (var i = 0; i < arrows.length; i++) {
+            try {
             molecule1 = document.getElementById(String(arrows[i][0]));
             molecule2 = document.getElementById(String(arrows[i][1]));
+            } catch(e) {
+            console.log("ERROR 53");
+            }
+            try {
             var conn = jsPlumb.connect({
                 source:molecule1,  // just pass in the current node in the selector for source 
                 target:molecule2,
@@ -363,19 +381,24 @@ var drawArrows = function(arrows) {
                 enabled:false,
                 endpoint:["Dot", {radius:1}],
             });
+            } catch(e) {
+            console.log("ERROR 54");
+            }
             //console.log("...");
             //conn.getOverlay("label").setLabel(conn.getParameters().reagents);
         }
-        jsPlumb.setSuspendDrawing(false, true);
+        try {
+        jsPlumb.setSuspendDrawing(false);
+        } catch(e) {
+        console.log("ERROR 55");
+        }
     });
 }
 
 
 
 
-//For typing in autocompleted reagents
-//Update this line by parsing the value of [item for sublist in [REAGENTS[x][1] for x in range(len(REAGENTS)+1) if not x==0] for item in sublist]   in synthProblem.py
-var typeableReagents = ['H2', 'Hydrogen', 'Pd/C', 'Palladium/Carbon catalyst', 'EtOH', 'Ethanol', 'Ethyl alcohol', 'C2H5OH', 'HF', 'Hydrogen fluoride', 'Hydrofluoric acid', 'HBr', 'Hydrogen bromide', 'Hydrobromic acid', 'HCl', 'Hydrogen chloride', 'Hydrochloric acid', 'HI', 'Hydrogen iodide', 'Hydroiodic acid', 'CH2Cl2', 'Dichloromethane', 'Fluorine', 'F2', 'Bromine', 'Br2', 'Chlorine', 'Cl2', 'Iodine', 'I2', 'ROOR', 'tBuOOtBu', 'Peroxide', 'Tert-butyl peroxide', 'Di-tert-butyl peroxide', 'mCPBA', 'PhCO3H', 'RCO3H', 'H2SO4', 'Sulfuric acid', 'H2O', 'Water', 'HOH', 'H20', 'HgSO4', 'Hg2+', 'Mercury sulfate', 'BH3', 'Borane', 'THF', 'Tetrahydrofuran', 'NaOH', 'Sodium hydroxide', 'Hydroxide', 'OH-', 'H2O2', 'Hydrogen peroxide', 'OsO4', 'Osmium tetroxide', 'Osmium oxide', 'NMO', 'NMMO', 'N-Methylmorpholine N-oxide', 'Acetone', 'Propanone', '(CH3)2CO', 'Ozone', 'O3', 'Dimethyl sulfide', 'Methylthiomethane', 'Me2S', 'Zn', 'Zinc', 'Lindlar catalyst', 'cat. Lindlar', 'Sodium', 'Na', 'NH3', 'Ammonia', 'Sodium amide', 'Sodamide', 'NaNH2', 'Amide', '1 equivalent', 'One equivalent', 'heat', 'hv', 'light', 'hnu', 'tert-butoxide', 'KOtBu', 'Potassium tert-butoxide', 'KOC(CH3)3'];
+
 //For having an autocomplete box which can take in multiple values
 function split( val ) {
     return val.split( /,\s*/ );
@@ -394,23 +417,27 @@ function allSetup() {
                 try {
                     jsPlumb.repaintEverything();
                 } catch(e) {
-                    console.log("ERROR! 43 In jsPlumb.repaintEverything();");
+                    console.log("ERROR! 43 In jsPlumb.repaintEverything");
                 }
             });
 
-            jsPlumb.importDefaults({
-                Connector:"StateMachine",
-                PaintStyle:{ lineWidth:3, strokeStyle:"#445566"},
-                ConnectionOverlays : [
-                    [ "Arrow", { 
-                        location:1,
-                        id:"arrow",
-                        length:10,
-                        foldback:1
-                    } ],
-                ],
-                Anchors : [ "TopCenter", "BottomCenter" ]
-            });
+            try {
+                jsPlumb.importDefaults({
+                    Connector:"StateMachine",
+                    PaintStyle:{ lineWidth:3, strokeStyle:"#445566"},
+                    ConnectionOverlays : [
+                        [ "Arrow", { 
+                            location:1,
+                            id:"arrow",
+                            length:10,
+                            foldback:1
+                        } ],
+                    ],
+                    Anchors : [ "TopCenter", "BottomCenter" ]
+                });
+            } catch(e) {
+                console.log("ERROR! 43 In jsPlumb.importDefaults;");
+            }
         });
     } catch(e) {
         console.log("ERROR! In allSetup() ???");
@@ -420,7 +447,7 @@ function allSetup() {
 
 //Start-up (document.ready) functions run by the user who is trying to solve
 //synthesis problems, only.
-function clientSetup() {
+function clientSetup(typeableReagents) {
     //For making a link display the solution
     $("#solutionDisplay").click(function() {
         $.ajax({
