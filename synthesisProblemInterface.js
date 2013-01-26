@@ -77,7 +77,7 @@ var drawMolecules = function(moleculesSorted) {
             //add a new div
             div = "<div id='" +
                     String(molecule[0]) + 
-                    classString + + 
+                    classString +
                     String(molecule[1]) + 
                     "</div>";
             htmlToAddToChart += div;
