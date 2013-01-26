@@ -70,16 +70,14 @@ var drawMolecules = function(moleculesSorted) {
         htmlToAddToChart += "<div id=\"cleared\">";
         for (var j=0; j<moleculesSorted[i].length; j++) {      //for molecule in row
             molecule = moleculesSorted[i][j];
-            var whetherIsStarting = "";
-            if (molecule[3])
-                whetherIsStarting = " class = 'starting'";
-                
+            var classString = "' class='molecule'>";
+            if (molecule[3]) {
+                classString = "' class='molecule starting'>";
+            }  
             //add a new div
             div = "<div id='" +
                     String(molecule[0]) + 
-                    "' class='molecule'" +
-                    whetherIsStarting +
-                    ">" + 
+                    classString + + 
                     String(molecule[1]) + 
                     "</div>";
             htmlToAddToChart += div;
