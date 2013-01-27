@@ -1,0 +1,10 @@
+#helperChatbox {
+    height: 100px;
+    overflow: auto;
+    width: 500px;
+}
+
+#chatarea {
+    background-color: #FFFFFF;
+    clear: left;
+}

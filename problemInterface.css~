@@ -1,102 +1,136 @@
 
-    body {
-        background-color: #000000;
-    }
-    #offscreen {
-        background-color: #000000;
-    }
-    .ui-autocomplete {
-        max-height: 100px;
-        overflow-y: auto;
-        /* prevent horizontal scrollbar */
-        overflow-x: hidden;
-    }
-    * html .ui-autocomplete {
-        height: 100px;
-    }
-    .molecule {
-        width: 200px;
-        height: 200px; 
-        padding: 0px; 
-        float: left; 
-        margin-top:10px; 
-        margin-bottom:10px; 
-        margin-right:10px; 
-        margin-left:10px; 
-        background-color:#FFFFFF;  
-    }
-    
-    .bigMolecule {
-        width: 400px;
-        height: 400px;
-        position: absolute;
-        left: -9999px;
-        top: 100px;
-        z-index: 10;
-        border: 1px;
-    }
-    
-    ul {
-        list-style-type:none;
-    }
-    .reaction { 
-        width: 150px; 
-        height: 50px; 
-        padding: 5px; 
-        float: left; 
-        margin-top:85px; 
-        margin-bottom:75px; 
-        margin-right:10px; 
-        margin-left:10px; 
-        background-color:#FFFFFF;
-    }
-    #logo {
-        margin-top: 10px;
-        margin-left:10px;
-        float:left;
-    }
-    .reagent {
-        margin-left:auto;
-        width: 165px; 
-        height: 50px; 
-        padding: 5px; 
-        float:left; 
-        margin-top:5px; 
-        margin-bottom:5px; 
-        margin-right:auto; 
-        background-color:#FFFFFF;
-    }
-    #reagentTyper {
-        margin-left:auto;
-        margin-right:auto;
-        width: 200px;
-    }
-    #reagentTyperBox {
-        width: 200px;
-    }
-    #addReagent {
-        width: 200px;
-    }
-    #target {
-        width: 200px;
-        margin-top: 10px;
-        margin-right:auto;
-        margin-left:auto;
-        margin-bottom:10px;
-        background-color:#FFFFFF;
-    }
-    #topbar   { width: 910px; height: 95px; padding: 0px; margin-top:10px; margin-bottom:10px; margin-left:auto; margin-right:auto; background-color:#FFFFFF;}
-    #main     { width: 910px; height: 500px; padding: 0px; margin-top:0px; margin-bottom:0px; margin-left:auto; margin-right:auto; background-color:#000000; }
-    #rightbar { width: 250px; height: 500px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:10px; margin-right:0px; background-color:#FFFFFF; overflow:auto;}
-    #leftbar  { width: 650px; height: 500px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; background-color:#FFFFFF; overflow:auto;}
+body {
+    background-color: #000000;
+    overflow: hidden;
+}
+#offscreen {
+    background-color: #000000;
+}
+.ui-autocomplete {
+    max-height: 100px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden; 
+}
+* html .ui-autocomplete {
+    height: 100px;
+}
+.fake-link {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+.arrowLabel {
+    background-color:#CCCCCC;
+    padding:3px;
+}
+.molecule {
+    width: 200px;
+    height: 200px; 
+    padding: 0px; 
+    float: left; 
+    margin-top:10px; 
+    margin-bottom:50px; 
+    margin-right:20px; 
+    margin-left:10px; 
+    background-color:#FFFFFF;  
+    border-style: solid;
+    border-width: 1px;
+}
 
-    
-    .box { 
-        width:135x; 
-        height:20px; 
-        padding:10px; 
-        margin-top: 10px;
-        margin-left:10px;
-        float:left;
-        background-color:#FFFFFF
-    }
+.bigMolecule {
+    width: 400px;
+    height: 400px;
+    position: absolute;
+    left: -9999px;
+    top: 100px;
+    z-index: 10;
+    border-style: solid;
+    border-width: 1px;
+}
+
+ul {
+    list-style-type:none;
+}
+.reaction { 
+    width: 150px; 
+    height: 50px; 
+    padding: 5px; 
+    float: left; 
+    margin-top:85px; 
+    margin-bottom:75px; 
+    margin-right:10px; 
+    margin-left:10px; 
+    background-color:#FFFFFF;
+}
+#logo {
+    margin-top: 10px;
+    margin-left:10px;
+    float:left;
+}
+.reagent {
+    margin-left:auto;
+    width: 165px; 
+    height: 50px; 
+    border: 1px solid black;
+    padding: 5px; 
+    float:left; 
+    margin-top:5px; 
+    margin-bottom:5px; 
+    margin-right:auto; 
+    background-color:#FFFFFF;
+}
+#reagentTyper {
+    margin-left:auto;
+    margin-right:auto;
+    width: 200px;
+}
+#reagentTyperBox {
+    width: 200px;
+}
+#addReagent {
+    width: 200px;
+}
+#cleared{
+    clear:both;
+}
+#target {
+    width: 200px;
+    margin-top: 10px;
+    margin-right:auto;
+    margin-left:auto;
+    margin-bottom:10px;
+    background-color:#FFFFFF;
+}
+#topbar   { width: 980px; height: 95px; padding: 0px; margin-top:10px; margin-bottom:10px; margin-left:auto; margin-right:auto; background-color:#FFFFFF;}
+#main     { width: 980px; height:500px; padding: 0px; margin-top:0px; margin-bottom:0px; margin-left:auto; margin-right:auto; background-color:#000000; }
+#rightbar { width: 250px; height:500px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:10px; margin-right:0px; background-color:#FFFFFF; overflow:auto;}
+#leftbar  { width: 720px; height:500px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; background-color:#FFFFFF; overflow:auto; overflow-x:auto}
+#chatbox {
+    position: fixed;
+    bottom: 0px;
+    margin-left: -9999px;  /*Invisible to start*/
+    height: 100px;
+    width: 600px;
+    background-color: #FFFFFF;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#helpbox {
+    height: 70px;
+    overflow: auto;
+}
+.box { 
+    width:135px; 
+    height:20px; 
+    padding:10px; 
+    margin-top: 10px;
+    margin-left:10px;
+    float:left;
+    background-color:#FFFFFF
+}
+
+._jsPlumb_connector {
+    z-index: 0;
+}
