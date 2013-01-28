@@ -7,4 +7,5 @@
 #chatarea {
     background-color: #FFFFFF;
     clear: left;
+    width: 550px;
 }

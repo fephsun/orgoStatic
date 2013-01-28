@@ -18,12 +18,15 @@ var redrawProblem = function() {
 }
 
 var successUpdate = function(success) {
-    if (success == "solution")
-        $("#successbox").html("<div style=\"background-color:#FFFFFF\"><h2>Solution:</h2></div>");
-    else if (success)
-        $("#successbox").html("<div style=\"background-color:#00FF00\"><h2>SUCCESS!</h2></div>");
-    else
-        $("#successbox").html("<div style=\"background-color:#FFFFFF\"><h2>Unsolved</h2></div>");
+    if (success == "solution"){
+        $("#successbox").html("<div style=\"color:#EEEEEE\">Solution:</div>");
+    }else if (success){
+        $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
+        $("#bigMolecule").html("Congrats! (more text should go here)");
+        $("#bigMolecule").css("left", "400px");
+    }else{
+        $("#successbox").html("<div style=\"color:#EEEEEE\">Unsolved</div>");
+    }
 }
 
 var drawAllTheThings = function(data) {
@@ -41,12 +44,7 @@ var drawAllTheThings = function(data) {
     try {
         jsPlumb.reset();
     } catch(e) {
-        console.log("ERROR! In detachAllConnections");
-    }
-    try {
-        //jsPlumb.removeAllEndpoints();
-    } catch(e) {
-        console.log("ERROR! In removeAllEndpoints");
+        console.log("ERROR! In jsPlumb reset");
     }
     try {
         drawArrows(dataObject.arrows);
@@ -74,11 +72,15 @@ var drawMolecules = function(moleculesSorted) {
     for (var i=0; i<moleculesSorted.length; i++){      //for row in moleculesSorted
         htmlToAddToChart += "<div id=\"cleared\">";
         for (var j=0; j<moleculesSorted[i].length; j++) {      //for molecule in row
-            molecule = moleculesSorted[i][j]
+            molecule = moleculesSorted[i][j];
+            var classString = "' class='molecule'>";
+            if (molecule[3]) {
+                classString = "' class='molecule starting'>";
+            }  
             //add a new div
             div = "<div id='" +
                     String(molecule[0]) + 
-                    "' class='molecule'>" + 
+                    classString +
                     String(molecule[1]) + 
                     "</div>";
             htmlToAddToChart += div;
@@ -102,12 +104,9 @@ var drawMolecules = function(moleculesSorted) {
         hoverClass: 'drop_hover',
         accept: '.molecule',
         drop: function(event, ui) {
-
-            
-            //get rid of divs?
             
             //draw things
-            if (ui.draggable.hasClass("molecule")) {
+            if (ui.draggable.hasClass("molecule") && !(ui.draggable.hasClass("starting"))) {
                 try {
                     id = ui.draggable.attr("id");
                     $.ajax({
@@ -199,7 +198,7 @@ var moleculeListSort = function(molecules, arrows) {
     for (var i=0; i<molecules.length; i++) {
         m = molecules[i];
         if (arrowProducts.indexOf(m[0]) == -1) {
-            startingMolecules.push([m[0], m[1], 0]);
+            startingMolecules.push([m[0], m[1], 0, true]); //the "true" is to keep track of it being a starting molecule.
             console.log("Added to starting: "+m[0]);
         }
         else console.log("Not added to starting: "+m[0]);
@@ -215,7 +214,7 @@ var moleculeListSort = function(molecules, arrows) {
         return "null";
     }
     
-    
+    //This entire next block is devoted to finding out the row (an integer) at which to draw a molecule.
     var maxInd = 0;
     var rank = function(currentMolecules, ind) {
         //If the size of currentMolecules is equal to the size of molecules, return -- you're done
@@ -254,7 +253,7 @@ var moleculeListSort = function(molecules, arrows) {
             //AND the current arrow's reactant IS in the current list,
             //add it
             if ((currentMoleculeIndices.indexOf(aP) == -1) && (toAddContents.indexOf(aP) == -1) && !(currentMoleculeIndices.indexOf(aR) == -1))
-                toAdd.push([aP, svgGet(aP), ind]);
+                toAdd.push([aP, svgGet(aP), ind, false]);
             else
                 console.log("Arrow product "+aP+" is not in current list, "+s);
         }
@@ -283,6 +282,7 @@ var moleculeListSort = function(molecules, arrows) {
     for (var i = 1; i <= maxInd; i++) {
     
         //[ [ triple for each (triple in rankedMolecules) if (triple[2] == i) ] ]
+        //alsoToAdd represents the next row to add to the output array.
         alsoToAdd = [];
         for(var j = 0; j < rankedMolecules.length; j++) {
             if (rankedMolecules[j][2] == i) {
@@ -293,12 +293,59 @@ var moleculeListSort = function(molecules, arrows) {
                 console.log(alsoToAdd);
             }
         }
-        output.push(alsoToAdd);
+        
+        //This bit of code: Rearranges the items in alsoToAdd so as to minimize arrow-crossing.
+        var prevToAdd = output[output.length-1]; //the previous row
+        var finalToAdd = [];
+        for (var j = 0; j < prevToAdd.length; j++) {
+            //Add, to finalToAdd, (the kth) item in alsoToAdd if it is at the end of any arrow starting with (the jth) element in prevToAdd
+            //This is kind of like a sort, so it might be time consuming. But we're O(n^3) from earlier, anyways. >.>
+            
+            var arrowProdsToCheck = []; //array will contain all products of arrows beginning with the jth element in prevToAdd
+            for (var l = 0; l < arrows.length; l++) {
+                if (arrows[l][0] == prevToAdd[j][0]) { //if the reactant is in the previous row, allow the product in array
+                    arrowProdsToCheck.push(arrows[l][1]);
+                }
+            } //end initialization of arrowProdsToCheck
+            
+            for (var k = 0; k < alsoToAdd.length; k++) {
+                //Check if: the kth item in alsoToAdd is --
+                    //not already in finalToAdd (automatic no) --this is important! some molecules are products of two arrows.
+                    //at the end of any arrow in arrowProdsToCheck (automatic yes, UNLESS the above)
+                    //if not any of the above, then default to don't add it
+                var shouldAddKthItem = false;
+                if (arrowProdsToCheck.indexOf(alsoToAdd[k][0]) != -1) { //it's in arrowProdsToCheck, so probably add it
+                    shouldAddKthItem = true;
+                    if (finalToAdd.indexOf(alsoToAdd[k]) != -1) { //check if it's already in finalToAdd, though; if it is, DON'T add it
+                        shouldAddKthItem = false;
+                    }
+                } 
+                
+                if (shouldAddKthItem) {
+                    finalToAdd.push(alsoToAdd[k]);
+                }
+            } 
+        }
+        //Add, to finalToAdd, anything in alsoToAdd which is NOT yet in finalToAdd
+        for (var k = 0; k < alsoToAdd.length; k++) {
+            if (finalToAdd.indexOf(alsoToAdd[k]) == -1) {
+                finalToAdd.push(alsoToAdd[k]);
+            }
+        }
+        
+        //output.push(alsoToAdd); //in case of bugs with finalToAdd, uncomment this
+        output.push(finalToAdd);
     }
     
     console.log("Finit molecule height: "+String(output.length));
     for(var i = 0; i<output.length; i++)
         console.log("Row length: "+String(output[i].length));
+    
+    
+    
+    
+    
+    
     
     return output
 }
@@ -399,32 +446,25 @@ function allSetup() {
     } catch(e) {
         console.log("ERROR! In allSetup() ???");
     }
+    
+    //On resize, recalculate the two div heights.
+    $(window).resize(function(){
+        remakeDivs();
+    });
+    remakeDivs();
 }
 
 
 //Start-up (document.ready) functions run by the user who is trying to solve
 //synthesis problems, only.
 function clientSetup(typeableReagents) {
-    //For making a link display the solution
-    $("#solutionDisplay").click(function() {
-        $.ajax({
-            type: "GET",
-            url: "/orgo/api/displaySolution/",
-            data: {},
-            success: function(data) {
-                drawAllTheThings(data);
-                isSolution = true;
-            },
-        });
-    });
     
     //Autocomplete box for reagents. Borrowed from jquery.
     $( "#reagentTyperBox" ).bind( "keydown", function( event ) {
         if ( event.keyCode === $.ui.keyCode.TAB && $( this ).data( "autocomplete" ).menu.active ) {
             event.preventDefault();
         }
-    })
-    .autocomplete({
+    }).autocomplete({
         minLength: 0,
         source: function( request, response ) {
             response( $.ui.autocomplete.filter(typeableReagents, extractLast( request.term ) ) );
@@ -474,6 +514,8 @@ function clientSetup(typeableReagents) {
         if (e.keyCode == 13) {
             updateReagents();
             $("#reagentTyperBox").val("");
+            //Also, get rid of the dropdown menu so that they can drag easily.
+            $("#addReagent").focus();
         }
     });
     
@@ -490,6 +532,19 @@ function clientSetup(typeableReagents) {
     
 }
 
+//For making a link display the solution
+function solutionDisplay() {
+    $.ajax({
+        type: "GET",
+        url: "/orgo/api/displaySolution/",
+        data: {},
+        success: function(data) {
+            drawAllTheThings(data);
+            isSolution = true;
+        },
+    });
+}
+
 //Makes the bigMolecule svg show up when you hover over the corresponding regular molecule.
 function updateBigMolecule(){
     $(".molecule, #target").each(function(){
@@ -501,9 +556,16 @@ function updateBigMolecule(){
                 //Sorta hackish way of testing whether anything is in the molecule div
                 return
             }
-            out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
-            $(bigSelector).css('left', '400px');
-            $(bigSelector).html(out);
+            
+            //If the bigMolecule is already there, we want clicking to get rid of it.
+            //if ($(bigSelector).css('left') == '400px') {
+            //    $(bigSelector).css('left', '-9999px');
+            //}
+            //else {
+                out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
+                $(bigSelector).css('left', '400px');
+                $(bigSelector).html(out);
+            //}
 
         });
     });
@@ -524,6 +586,7 @@ var updateReagents = function() {
             $("#reagentsHere").prepend(data);
         },
     });
+    
 }
 
 function submitLine() {
@@ -615,6 +678,11 @@ function saveProblem() {
             $("#savebox").html(out)
         }
     });
+}
+
+function remakeDivs() {
+    $("#leftbar").height($(window).height());
+    $("#rightbar").height($(window).height());
 }
 
 

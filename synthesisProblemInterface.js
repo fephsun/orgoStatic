@@ -18,12 +18,15 @@ var redrawProblem = function() {
 }
 
 var successUpdate = function(success) {
-    if (success == "solution")
-        $("#successbox").html("<div style=\"background-color:#FFFFFF\"><h2>Solution:</h2></div>");
-    else if (success)
-        $("#successbox").html("<div style=\"background-color:#00FF00\"><h2>SUCCESS!</h2></div>");
-    else
-        $("#successbox").html("<div style=\"background-color:#FFFFFF\"><h2>Unsolved</h2></div>");
+    if (success == "solution"){
+        $("#successbox").html("<div style=\"color:#EEEEEE\">Solution:</div>");
+    }else if (success){
+        $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
+        $("#bigMolecule").html("Congrats! (more text should go here)");
+        $("#bigMolecule").css("left", "400px");
+    }else{
+        $("#successbox").html("<div style=\"color:#EEEEEE\">Unsolved</div>");
+    }
 }
 
 var drawAllTheThings = function(data) {
@@ -443,24 +446,18 @@ function allSetup() {
     } catch(e) {
         console.log("ERROR! In allSetup() ???");
     }
+    
+    //On resize, recalculate the two div heights.
+    $(window).resize(function(){
+        remakeDivs();
+    });
+    remakeDivs();
 }
 
 
 //Start-up (document.ready) functions run by the user who is trying to solve
 //synthesis problems, only.
 function clientSetup(typeableReagents) {
-    //For making a link display the solution
-    $("#solutionDisplay").click(function() {
-        $.ajax({
-            type: "GET",
-            url: "/orgo/api/displaySolution/",
-            data: {},
-            success: function(data) {
-                drawAllTheThings(data);
-                isSolution = true;
-            },
-        });
-    });
     
     //Autocomplete box for reagents. Borrowed from jquery.
     $( "#reagentTyperBox" ).bind( "keydown", function( event ) {
@@ -533,6 +530,19 @@ function clientSetup(typeableReagents) {
     updateBigMolecule();
     
     
+}
+
+//For making a link display the solution
+function solutionDisplay() {
+    $.ajax({
+        type: "GET",
+        url: "/orgo/api/displaySolution/",
+        data: {},
+        success: function(data) {
+            drawAllTheThings(data);
+            isSolution = true;
+        },
+    });
 }
 
 //Makes the bigMolecule svg show up when you hover over the corresponding regular molecule.
@@ -668,6 +678,11 @@ function saveProblem() {
             $("#savebox").html(out)
         }
     });
+}
+
+function remakeDivs() {
+    $("#leftbar").height($(window).height()-60);
+    $("#rightbar").height($(window).height()-60);
 }
 
 
