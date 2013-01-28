@@ -21,9 +21,7 @@ var successUpdate = function(success) {
     if (success == "solution"){
         $("#successbox").html("<div style=\"color:#EEEEEE\">Solution:</div>");
     }else if (success){
-        $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
-        $("#bigMolecule").html("Congrats! (more text should go here)");
-        $("#bigMolecule").css("left", "400px");
+        onSuccess();
     }else{
         $("#successbox").html("<div style=\"color:#EEEEEE\">Unsolved</div>");
     }
@@ -96,7 +94,7 @@ var drawMolecules = function(moleculesSorted) {
     $("#leftbar").html("");
     $("#leftbar").append(htmlToAddToChart);
     //For making molecules and reactions draggable
-    $( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100, drop: function(event, ui) {} });
+    $( ".molecule" ).draggable({helper: "clone", revert:"invalid", revertDuration: 100, drop: function(event, ui) {} });
     //The right bar is droppable, and triggers deletion of molecules
     $("#rightbar, #offscreen").droppable({
         greedy: true,
@@ -155,6 +153,11 @@ var drawMolecules = function(moleculesSorted) {
                 });
             }
             else if (ui.draggable.hasClass("reagent")) {
+                if (tutorial == 2) {
+                    tutorial = 3;
+                    $(".wave2").css("display", "none");
+                    $(".wave3").css("display", "block");
+                }
                 $.ajax({
                     type: "POST",
                     url: "/orgo/api/addReagentToMolecule/",
@@ -575,18 +578,27 @@ var updateReagents = function() {
     //Don't need to send anything back!
     //Update the reagents present in the sidebar with a new reagent.
     //Keep data about that reagent in currentReagents.
+    
+    //If we're in tutorial mode, advance to the next set of boxes.
+    if (tutorial == 1){
+        tutorial = 2;
+        $(".wave1").css("display", "none");
+        $(".wave2").css("display", "block");
+    }
+    
     var reagentString = $("#reagentTyperBox").val();
     
-    $.ajax({
-        type: "POST",
-        url: "/orgo/api/returnReagentHtml/",
-        data: {'reagentString': reagentString},
-        success: function(data) {
-            if (data != "") 
-            $("#reagentsHere").prepend(data);
-        },
-    });
-    
+    if (reagentString != "") {
+        $.ajax({
+            type: "POST",
+            url: "/orgo/api/returnReagentHtml/",
+            data: {'reagentString': reagentString},
+            success: function(data) {
+                if (data != "") 
+                $("#reagentsHere").prepend(data);
+            },
+        });
+    }
 }
 
 function submitLine() {
@@ -675,7 +687,8 @@ function saveProblem() {
         url: "/orgo/api/saveProblem",
         success: function(data){
             out="Problem saved. <br /> ID: "+data;
-            $("#savebox").html(out)
+            $("#messageArea").html(out);
+            $("#messageBox").css("display", "block");
         }
     });
 }
@@ -685,7 +698,10 @@ function remakeDivs() {
     $("#rightbar").height($(window).height()-60);
 }
 
-
+function closeTutorial() {
+    tutorial = 0;
+    $(".wave3").css("display", "none");
+}
 
 
 

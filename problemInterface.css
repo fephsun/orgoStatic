@@ -2,6 +2,9 @@
 body {
     overflow: hidden;
 }
+.container{
+    position: relative;
+}
 #offscreen {
     background-color: #000000;
 }
@@ -32,11 +35,39 @@ body {
     margin-bottom:50px; 
     margin-right:20px; 
     margin-left:10px; 
+    border: 1px solid #F6F6F6;
+}
+#target {
+    width: 200px;
+    margin-top: 10px;
+    margin-right:auto;
+    margin-left:auto;
+    margin-bottom:10px;
+    border: 1px solid #F6F6F6;
 }
 
 .molecule:hover {
     background-color: white;
+    border: 1px solid #E0E0E0;
 }
+.molecule#startingMolecule:hover {
+    background-color: #F6F6F6;
+    border: 1px solid #F6F6F6;
+}
+.molecule#productMolecule:hover {
+    background-color: #F6F6F6;
+    border: 1px solid #F6F6F6;
+}
+
+#target:hover {
+    background-color: white;
+    border: 1px solid #E0E0E0;
+}
+#target:hover {
+    background-color: #F6F6F6;
+    border: 1px solid #F6F6F6;
+}
+
 
 .bigMolecule {
     width: 400px;
@@ -62,7 +93,7 @@ ul {
     margin-bottom:75px; 
     margin-right:10px; 
     margin-left:10px; 
-    background-color:#FFFFFF;
+    background-color:#F6F6F6;
 }
 #logo {
     margin-top: 10px;
@@ -73,14 +104,20 @@ ul {
     margin-left:auto;
     width: 165px; 
     height: 50px; 
-    border: 1px solid black;
+    height: 100%; 
     padding: 5px; 
     float:left; 
     margin-top:5px; 
     margin-bottom:5px; 
     margin-right:auto; 
-    background-color:#FFFFFF;
+    border: 1px solid #F6F6F6;
 }
+
+.reagent:hover{
+    background-color:#FFFFFF;
+    border: 1px solid #E0E0E0;
+}
+
 #reagentTyper {
     margin-left:auto;
     margin-right:auto;
@@ -95,13 +132,7 @@ ul {
 #cleared{
     clear:both;
 }
-#target {
-    width: 200px;
-    margin-top: 10px;
-    margin-right:auto;
-    margin-left:auto;
-    margin-bottom:10px;
-}
+
 
 #rightbar {height:550px; background-color:#F6F6F6; overflow:auto;}
 #leftbar  {height:550px; background-color:#F6F6F6; overflow:auto;}
@@ -132,3 +163,67 @@ ul {
 ._jsPlumb_connector {
     z-index: 0;
 }
+
+#messageBox {
+    position: absolute;
+    top: 100px;
+    left: 0px;
+    right: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    display: none;
+    padding: 10px;
+    width: 200px;
+    border: 1px solid black;
+    background-color: white;
+}
+
+.helperPopup {
+    border: 1px solid #E0E0E0;
+    padding: 10px;
+    position: absolute;
+    width: 300px;
+    background-color: white;
+    display: none;
+}
+
+#startingMoleculeH {
+    top: 200px;
+}
+
+#targetMoleculeH {
+    top: 100px;
+    left: 600px;
+}
+
+#inputH {
+    top: 250px;
+    left: 600px;
+}
+
+#reagentsH {
+    top: 330px;
+    left: 600px;
+}
+
+#reactedH {
+    top: 250px;
+    left: 250px;
+}
+
+#reacted1StepH {
+    top: 200px;
+    left: 250px;
+}
+
+#topbarH {
+    top: -20px;
+    left: 250px;
+}
+
+#doneH {
+    top: 250px;
+    left: 600px;
+}
+
+

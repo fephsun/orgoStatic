@@ -5,11 +5,16 @@ var jq = jQuery.noConflict();
 function setup(typeableReagents) {
     //For making molecules and reactions draggable
     //$( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100});
-    $( ".reaction" ).draggable({helper: "clone", revert:true, revertDuration: 100});
+    //$( ".reaction" ).draggable({helper: "clone", revert:true, revertDuration: 100});
     $( ".reagent" ).draggable({helper: "clone", revert:true, revertDuration: 100});
     
-    $("#startingMolecule").droppable({
+    $("#leftbar").droppable({
         drop: function(event, ui) {
+            if (tutorial == 2) {
+                tutorial = 3;
+                $(".wave2").css("display", "none");
+                $(".wave3").css("display", "block");
+            }
             $.ajax({
                 type: "POST",
                 url: "/orgo/api/checkSingleStepReaction/",
@@ -26,10 +31,14 @@ function setup(typeableReagents) {
                     
                     
                     //Update with whether or not the user was successful
-                    if (dataObject.success)
-                        $("#successbox").html("<div style=\"background-color:#00FF00\"><h2>SUCCESS!</h2></div>");
-                    else
-                        $("#successbox").html("<div style=\"background-color:#FFFFFF\"><h2>Not quite.</h2></div>");
+                    if (dataObject.success) {
+                        $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
+                        $("#reagentsHere").html("<div style=\"border-radius: 10px; padding:20px; background-color: #181818; margin-top:50px; font-color:#00FF00\"><h3 style='color:#999999'>Congrats!</h3> <br /> <a href='/orgo/namereagent/'> Do another </a><br /><a href='/orgo/'> Back to home </a></div>");
+                        //$("#messageArea").html("<h2 style='color:green'>Congrats!</h2> <br /> <a href='/orgo/namereagent/'> Do another </a><br /><a href='/orgo/'> Back to home </a>");
+                        //$("#messageBox").css('display', "block");
+                    } else {
+                        $("#successbox").html("Not quite.");
+                    }
                 },
             });
         }
@@ -81,17 +90,24 @@ function setup(typeableReagents) {
         //Don't need to send anything back!
         //Update the reagents present in the sidebar with a new reagent.
         //Keep data about that reagent in currentReagents.
+        if (tutorial == 1){
+            tutorial = 2;
+            $(".wave1").css("display", "none");
+            $(".wave2").css("display", "block");
+        }
         var reagentString = $("#reagentTyperBox").val();
         
-        $.ajax({
-            type: "POST",
-            url: "/orgo/api/returnReagentHtml/",
-            data: {'reagentString': reagentString},
-            success: function(data) {
-                if (data != "") 
-                $("#reagentsHere").prepend(data);
-            },
-        });
+        if (reagentString != "") {
+            $.ajax({
+                type: "POST",
+                url: "/orgo/api/returnReagentHtml/",
+                data: {'reagentString': reagentString},
+                success: function(data) {
+                    if (data != "") 
+                    $("#reagentsHere").prepend(data);
+                },
+            });
+        }
     }
 
     
@@ -110,6 +126,7 @@ function setup(typeableReagents) {
         if (e.keyCode == 13) {
             updateReagents();
             $("#reagentTyperBox").val("");
+            $("#addReagent").focus();
         }
     });
 }
@@ -143,6 +160,11 @@ showAnswer = function(){
             $("#productMolecule").html($("#target").html());
         }
     });
+}
+
+function closeTutorial() {
+    tutorial = 0;
+    $(".wave3").css("display", "none");
 }
 
 var updateReagents;
