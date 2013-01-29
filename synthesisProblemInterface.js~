@@ -4,6 +4,7 @@ var state = "Normal";
 var pk = 0; //Gets changed before chat starts.
 var REFRESH = 1500; //Chat refresh time, in ms.
 var isSolution = false;
+var isSuccess = false;
 
 //For drawing stuff upon initialization
 var redrawProblem = function() {
@@ -21,9 +22,8 @@ var successUpdate = function(success) {
     if (success == "solution"){
         $("#successbox").html("<div style=\"color:#EEEEEE\">Solution:</div>");
     }else if (success){
-        $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
-        $("#bigMolecule").html("Congrats! (more text should go here)");
-        $("#bigMolecule").css("left", "400px");
+        onSuccess();
+        isSuccess = true;
     }else{
         $("#successbox").html("<div style=\"color:#EEEEEE\">Unsolved</div>");
     }
@@ -96,13 +96,11 @@ var drawMolecules = function(moleculesSorted) {
     $("#leftbar").html("");
     $("#leftbar").append(htmlToAddToChart);
     //For making molecules and reactions draggable
-    $( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100, drop: function(event, ui) {} });
+    $( ".molecule" ).draggable({helper: "clone", revert:"invalid", revertDuration: 100, drop: function(event, ui) {} });
     //The right bar is droppable, and triggers deletion of molecules
     $("#rightbar, #offscreen").droppable({
         greedy: true,
         tolerance: 'pointer',
-        hoverClass: 'drop_hover',
-        accept: '.molecule',
         drop: function(event, ui) {
             
             //draw things
@@ -133,6 +131,8 @@ var drawMolecules = function(moleculesSorted) {
     //Molecules are droppable, triggering addition of reagents or other molecules
     $(".molecule").droppable({
         greedy: true,
+        accept: '.molecule, .reagent',
+        hoverClass: 'drophover',
         drop: function(event, ui) {
             if (isSolution) {
                 isSolution = false;
@@ -155,6 +155,11 @@ var drawMolecules = function(moleculesSorted) {
                 });
             }
             else if (ui.draggable.hasClass("reagent")) {
+                if (tutorial == 2) {
+                    tutorial = 3;
+                    $(".wave2").css("display", "none");
+                    $(".wave3").css("display", "block");
+                }
                 $.ajax({
                     type: "POST",
                     url: "/orgo/api/addReagentToMolecule/",
@@ -428,7 +433,7 @@ function allSetup() {
             try {
                 jsPlumb.importDefaults({
                     Connector:"StateMachine",
-                    PaintStyle:{ lineWidth:3, strokeStyle:"#445566"},
+                    PaintStyle:{ lineWidth:3, strokeStyle:"#181818"},
                     ConnectionOverlays : [
                         [ "Arrow", { 
                             location:1,
@@ -529,6 +534,9 @@ function clientSetup(typeableReagents) {
     
     updateBigMolecule();
     
+    //Make the helpbox draggable.
+    $("#chatbox").draggable();
+    
     
 }
 
@@ -550,22 +558,13 @@ function updateBigMolecule(){
     $(".molecule, #target").each(function(){
         var bigSelector = "#bigMolecule";
         $(this).click(function(){
-            //What happens when mouse enters area
-            //Wait for a few seconds, then show the big molecule
             if ($(this).html().length < 5){
                 //Sorta hackish way of testing whether anything is in the molecule div
                 return
             }
-            
-            //If the bigMolecule is already there, we want clicking to get rid of it.
-            //if ($(bigSelector).css('left') == '400px') {
-            //    $(bigSelector).css('left', '-9999px');
-            //}
-            //else {
-                out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
-                $(bigSelector).css('left', '400px');
-                $(bigSelector).html(out);
-            //}
+            out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
+            $(bigSelector).css('left', '400px');
+            $(bigSelector).html(out);
 
         });
     });
@@ -575,18 +574,30 @@ var updateReagents = function() {
     //Don't need to send anything back!
     //Update the reagents present in the sidebar with a new reagent.
     //Keep data about that reagent in currentReagents.
+    
+    //If we're in tutorial mode, advance to the next set of boxes.
+    if (tutorial == 1){
+        tutorial = 2;
+        $(".wave1").css("display", "none");
+        $(".wave2").css("display", "block");
+    }
+    
     var reagentString = $("#reagentTyperBox").val();
     
-    $.ajax({
-        type: "POST",
-        url: "/orgo/api/returnReagentHtml/",
-        data: {'reagentString': reagentString},
-        success: function(data) {
-            if (data != "") 
-            $("#reagentsHere").prepend(data);
-        },
-    });
-    
+    if (reagentString != "") {
+        $.ajax({
+            type: "POST",
+            url: "/orgo/api/returnReagentHtml/",
+            data: {'reagentString': reagentString},
+            success: function(data) {
+                if (data != "") {
+                    if (isSuccess)
+                        $("#reagentsHere").html("")
+                    $("#reagentsHere").prepend(data);
+                }
+            },
+        });
+    }
 }
 
 function submitLine() {
@@ -675,17 +686,21 @@ function saveProblem() {
         url: "/orgo/api/saveProblem",
         success: function(data){
             out="Problem saved. <br /> ID: "+data;
-            $("#savebox").html(out)
+            $("#messageArea").html(out);
+            $("#messageBox").css("display", "block");
         }
     });
 }
 
 function remakeDivs() {
-    $("#leftbar").height($(window).height());
-    $("#rightbar").height($(window).height());
+    $("#leftbar").height($(window).height()-60);
+    $("#rightbar").height($(window).height()-60);
 }
 
-
+function closeTutorial() {
+    tutorial = 0;
+    $(".wave3").css("display", "none");
+}
 
 
 

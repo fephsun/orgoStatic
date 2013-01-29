@@ -457,6 +457,10 @@ function allSetup() {
         remakeDivs();
     });
     remakeDivs();
+    
+        
+    //Make the helpbox draggable.
+    $("#chatbox").draggable();
 }
 
 

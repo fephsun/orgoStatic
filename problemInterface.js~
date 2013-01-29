@@ -10,6 +10,11 @@ function setup(typeableReagents) {
     
     $("#startingMolecule").droppable({
         drop: function(event, ui) {
+            if (tutorial == 2) {
+                tutorial = 3;
+                $(".wave2").css("display", "none");
+                $(".wave3").css("display", "block");
+            }
             $.ajax({
                 type: "POST",
                 url: "/orgo/api/checkSingleStepReaction/",
@@ -27,9 +32,11 @@ function setup(typeableReagents) {
                     
                     //Update with whether or not the user was successful
                     if (dataObject.success)
-                        $("#successbox").html("<div style=\"background-color:#00FF00\"><h2>SUCCESS!</h2></div>");
+                        $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
+                        $("#messageArea").html("<h2 style='color:green'>Congrats!</h2> <br /> <a href='/orgo/namereagent/'> Do another </a><br /><a href='/orgo/'> Back to home </a>");
+        $("#messageBox").css('display', "block");
                     else
-                        $("#successbox").html("<div style=\"background-color:#FFFFFF\"><h2>Not quite.</h2></div>");
+                        $("#successbox").html("Not quite.");
                 },
             });
         }
@@ -81,6 +88,11 @@ function setup(typeableReagents) {
         //Don't need to send anything back!
         //Update the reagents present in the sidebar with a new reagent.
         //Keep data about that reagent in currentReagents.
+        if (tutorial == 1){
+            tutorial = 2;
+            $(".wave1").css("display", "none");
+            $(".wave2").css("display", "block");
+        }
         var reagentString = $("#reagentTyperBox").val();
         
         $.ajax({
@@ -112,7 +124,7 @@ function setup(typeableReagents) {
             $("#reagentTyperBox").val("");
         }
     });
-});
+}
 
 //Makes the bigMolecule svg show up when you hover over the corresponding regular molecule.
 function updateBigMolecule(){
@@ -143,6 +155,11 @@ showAnswer = function(){
             $("#productMolecule").html($("#target").html());
         }
     });
+}
+
+function closeTutorial() {
+    tutorial = 0;
+    $(".wave3").css("display", "none");
 }
 
 var updateReagents;
