@@ -35,7 +35,8 @@ body {
     margin-bottom:50px; 
     margin-right:20px; 
     margin-left:10px; 
-    border: 1px solid #F6F6F6;
+    border: 1px solid transparent;
+    border-radius: 10px;
 }
 #target {
     width: 200px;
@@ -43,7 +44,8 @@ body {
     margin-right:auto;
     margin-left:auto;
     margin-bottom:10px;
-    border: 1px solid #F6F6F6;
+    border: 1px solid transparent;
+    border-radius: 10px;
 }
 
 .molecule:hover {
@@ -51,12 +53,12 @@ body {
     border: 1px solid #E0E0E0;
 }
 .molecule#startingMolecule:hover {
-    background-color: #F6F6F6;
-    border: 1px solid #F6F6F6;
+    background-color: transparent;
+    border: 1px solid transparent;
 }
 .molecule#productMolecule:hover {
-    background-color: #F6F6F6;
-    border: 1px solid #F6F6F6;
+    background-color: transparent;
+    border: 1px solid transparent;
 }
 
 #target:hover {
@@ -64,10 +66,14 @@ body {
     border: 1px solid #E0E0E0;
 }
 #target:hover {
-    background-color: #F6F6F6;
-    border: 1px solid #F6F6F6;
+    background-color: transparent;
+    border: 1px solid transparent;
 }
 
+.drophover {
+    background-color: #E0E0E0;
+    border: 1px solid #E0E0E0;
+}
 
 .bigMolecule {
     width: 400px;
@@ -79,6 +85,7 @@ body {
     background-color: #FFFFFF;
     border-style: solid;
     border-width: 1px;
+    border-radius: 20px;
 }
 
 ul {
@@ -93,7 +100,7 @@ ul {
     margin-bottom:75px; 
     margin-right:10px; 
     margin-left:10px; 
-    background-color:#F6F6F6;
+    background-color:transparent;
 }
 #logo {
     margin-top: 10px;
@@ -101,7 +108,7 @@ ul {
     float:left;
 }
 .reagent {
-    margin-left:auto;
+    margin-left:20px;
     width: 165px; 
     height: 50px; 
     height: 100%; 
@@ -109,8 +116,8 @@ ul {
     float:left; 
     margin-top:5px; 
     margin-bottom:5px; 
-    margin-right:auto; 
-    border: 1px solid #F6F6F6;
+    border: 1px solid transparent;
+    border-radius:10px;
 }
 
 .reagent:hover{
@@ -134,8 +141,8 @@ ul {
 }
 
 
-#rightbar {height:550px; background-color:#F6F6F6; overflow:auto;}
-#leftbar  {height:550px; background-color:#F6F6F6; overflow:auto;}
+#rightbar {height:550px; background-color:transparent; overflow:auto;}
+#leftbar  {height:550px; background-color:transparent; overflow:auto;}
 #chatbox {
     position: fixed;
     bottom: 0px;

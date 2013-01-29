@@ -4,6 +4,7 @@ var state = "Normal";
 var pk = 0; //Gets changed before chat starts.
 var REFRESH = 1500; //Chat refresh time, in ms.
 var isSolution = false;
+var isSuccess = false;
 
 //For drawing stuff upon initialization
 var redrawProblem = function() {
@@ -22,6 +23,7 @@ var successUpdate = function(success) {
         $("#successbox").html("<div style=\"color:#EEEEEE\">Solution:</div>");
     }else if (success){
         onSuccess();
+        isSuccess = true;
     }else{
         $("#successbox").html("<div style=\"color:#EEEEEE\">Unsolved</div>");
     }
@@ -99,8 +101,6 @@ var drawMolecules = function(moleculesSorted) {
     $("#rightbar, #offscreen").droppable({
         greedy: true,
         tolerance: 'pointer',
-        hoverClass: 'drop_hover',
-        accept: '.molecule',
         drop: function(event, ui) {
             
             //draw things
@@ -131,6 +131,8 @@ var drawMolecules = function(moleculesSorted) {
     //Molecules are droppable, triggering addition of reagents or other molecules
     $(".molecule").droppable({
         greedy: true,
+        accept: '.molecule, .reagent',
+        hoverClass: 'drophover',
         drop: function(event, ui) {
             if (isSolution) {
                 isSolution = false;
@@ -431,7 +433,7 @@ function allSetup() {
             try {
                 jsPlumb.importDefaults({
                     Connector:"StateMachine",
-                    PaintStyle:{ lineWidth:3, strokeStyle:"#445566"},
+                    PaintStyle:{ lineWidth:3, strokeStyle:"#181818"},
                     ConnectionOverlays : [
                         [ "Arrow", { 
                             location:1,
@@ -553,22 +555,13 @@ function updateBigMolecule(){
     $(".molecule, #target").each(function(){
         var bigSelector = "#bigMolecule";
         $(this).click(function(){
-            //What happens when mouse enters area
-            //Wait for a few seconds, then show the big molecule
             if ($(this).html().length < 5){
                 //Sorta hackish way of testing whether anything is in the molecule div
                 return
             }
-            
-            //If the bigMolecule is already there, we want clicking to get rid of it.
-            //if ($(bigSelector).css('left') == '400px') {
-            //    $(bigSelector).css('left', '-9999px');
-            //}
-            //else {
-                out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
-                $(bigSelector).css('left', '400px');
-                $(bigSelector).html(out);
-            //}
+            out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
+            $(bigSelector).css('left', '400px');
+            $(bigSelector).html(out);
 
         });
     });
@@ -594,8 +587,11 @@ var updateReagents = function() {
             url: "/orgo/api/returnReagentHtml/",
             data: {'reagentString': reagentString},
             success: function(data) {
-                if (data != "") 
-                $("#reagentsHere").prepend(data);
+                if (data != "") {
+                    if (isSuccess)
+                        $("#reagentsHere").html("")
+                    $("#reagentsHere").prepend(data);
+                }
             },
         });
     }

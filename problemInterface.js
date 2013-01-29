@@ -2,6 +2,8 @@
 
 var jq = jQuery.noConflict();
 
+var isSuccess = false;
+
 function setup(typeableReagents) {
     //For making molecules and reactions draggable
     //$( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100});
@@ -32,10 +34,12 @@ function setup(typeableReagents) {
                     
                     //Update with whether or not the user was successful
                     if (dataObject.success) {
+                        isSuccess = true;
                         $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
                         $("#reagentsHere").html("<div style=\"border-radius: 10px; padding:20px; background-color: #181818; margin-top:50px; font-color:#00FF00\"><h3 style='color:#999999'>Congrats!</h3> <br /> <a href='/orgo/namereagent/'> Do another </a><br /><a href='/orgo/'> Back to home </a></div>");
                         //$("#messageArea").html("<h2 style='color:green'>Congrats!</h2> <br /> <a href='/orgo/namereagent/'> Do another </a><br /><a href='/orgo/'> Back to home </a>");
                         //$("#messageBox").css('display', "block");
+                        
                     } else {
                         $("#successbox").html("Not quite.");
                     }
@@ -103,8 +107,11 @@ function setup(typeableReagents) {
                 url: "/orgo/api/returnReagentHtml/",
                 data: {'reagentString': reagentString},
                 success: function(data) {
-                    if (data != "") 
-                    $("#reagentsHere").prepend(data);
+                    if (data != "") {
+                        if (isSuccess)
+                            $("#reagentsHere").html("")
+                        $("#reagentsHere").prepend(data);
+                    }
                 },
             });
         }
