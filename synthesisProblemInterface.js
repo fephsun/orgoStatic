@@ -20,12 +20,12 @@ var redrawProblem = function() {
 
 var successUpdate = function(success) {
     if (success == "solution"){
-        $("#successbox").html("<div style=\"color:#EEEEEE\">Solution:</div>");
+        $("#successbox").html("<div style=\"color:#EEEEEE\" class=\"headnavbar\">Solution</div>");
     }else if (success){
         onSuccess();
         isSuccess = true;
     }else{
-        $("#successbox").html("<div style=\"color:#EEEEEE\">Unsolved</div>");
+        $("#successbox").html("<div style=\"color:#EEEEEE\" class=\"headnavbar\">Unsolved</div>");
     }
 }
 
@@ -39,22 +39,22 @@ var drawAllTheThings = function(data) {
     try {
         drawMolecules(moleculeListSort(dataObject.molecules, dataObject.arrows));
     } catch(e) {
-        console.log("ERROR! In drawMolecules");
+        //console.log("ERROR! In drawMolecules");
     }
     try {
         jsPlumb.reset();
     } catch(e) {
-        console.log("ERROR! In jsPlumb reset");
+        ////console.log("ERROR! In jsPlumb reset");
     }
     try {
         drawArrows(dataObject.arrows);
     } catch(e) {
-        console.log("ERROR! In drawArrows");
+        ////console.log("ERROR! In drawArrows");
     }
     try {
         jsPlumb.repaintEverything();
     } catch(e) {
-        console.log("ERROR! In jsPlumb.repaintEverything()" + e.stack);
+        ////console.log("ERROR! In jsPlumb.repaintEverything()" + e.stack);
     }
     
     //Update with whether or not the user was successful
@@ -65,7 +65,7 @@ var drawAllTheThings = function(data) {
 //        [ [[id,svg], [id,svg], [id,svg], ... ], //first row
 //        [[id,svg], [id,svg], [id,svg], ... ], ... ] //second row
 var drawMolecules = function(moleculesSorted) {
-    console.log(moleculesSorted.length);
+    ////console.log(moleculesSorted.length);
     //we need to create a bunch of divs of the form
         //<div id={{id_number}} class="molecule">{{svg_data}}</div>
     htmlToAddToChart = "";
@@ -84,7 +84,7 @@ var drawMolecules = function(moleculesSorted) {
                     String(molecule[1]) + 
                     "</div>";
             htmlToAddToChart += div;
-            console.log("Added new div.");
+            ////console.log("Added new div.");
         }
         //add a line break, or something
         htmlToAddToChart += "</div><br />";
@@ -104,7 +104,7 @@ var drawMolecules = function(moleculesSorted) {
         drop: function(event, ui) {
             
             //draw things
-            if (ui.draggable.hasClass("molecule") && !(ui.draggable.hasClass("starting"))) {
+            if (ui.draggable.hasClass("molecule") && !(ui.draggable.hasClass("starting")) && !isSolution) {
                 try {
                     id = ui.draggable.attr("id");
                     $.ajax({
@@ -114,11 +114,11 @@ var drawMolecules = function(moleculesSorted) {
                         success: function(data) {
                             ui.draggable.remove();
                             drawAllTheThings(data);
-                            console.log("Post request successful.");
+                            ////console.log("Post request successful.");
                         }
                     });
                 } catch(e) {
-                    console.log("ERROR! In rightbar/offscreen droppable.");
+                    ////console.log("ERROR! In rightbar/offscreen droppable.");
                 }
             }
         }
@@ -135,13 +135,15 @@ var drawMolecules = function(moleculesSorted) {
         hoverClass: 'drophover',
         drop: function(event, ui) {
             if (isSolution) {
+            /*
                 isSolution = false;
                 redrawProblem();
                 try{
                     jsPlumb.repaintEverything();
                 } catch(e) {
-                    console.log("ERROR! 42 In jsPlumb.repaintEverything();");
+                    ////console.log("ERROR! 42 In jsPlumb.repaintEverything();");
                 }
+                */
             }
             else if (ui.draggable.hasClass("molecule")) {
                 $.ajax({
@@ -167,7 +169,7 @@ var drawMolecules = function(moleculesSorted) {
                            'moleculeOn': $(this).attr("id")},
                     success: function(data) {
                         drawAllTheThings(data);
-                        console.log("Reagent string sent to ajax request: "+ui.draggable.attr("reagentString"));
+                        ////console.log("Reagent string sent to ajax request: "+ui.draggable.attr("reagentString"));
                     },
                 });
             }
@@ -185,7 +187,7 @@ var drawMolecules = function(moleculesSorted) {
 //CAN BE MADE BETTER, specifically by minimizing arrows crossing over each other.
 //RETURN TO THIS LATER.
 var moleculeListSort = function(molecules, arrows) {
-    console.log("Init molecule len: "+String(molecules.length));
+    ////console.log("Init molecule len: "+String(molecules.length));
     //Iterate through the list, determining horizontal rank:
         //Figure out which molecules are first (aka starting molecules)
     
@@ -195,7 +197,7 @@ var moleculeListSort = function(molecules, arrows) {
     var arrowProducts = [];
     for (var i=0; i<arrows.length; i++) {
         arrowProducts.push(arrows[i][1]);
-        console.log("Arrow: "+arrows[i][0]+", "+arrows[i][1]+", "+arrows[i][2]);
+        ////console.log("Arrow: "+arrows[i][0]+", "+arrows[i][1]+", "+arrows[i][2]);
     }
     
     
@@ -204,9 +206,9 @@ var moleculeListSort = function(molecules, arrows) {
         m = molecules[i];
         if (arrowProducts.indexOf(m[0]) == -1) {
             startingMolecules.push([m[0], m[1], 0, true]); //the "true" is to keep track of it being a starting molecule.
-            console.log("Added to starting: "+m[0]);
+            //console.log("Added to starting: "+m[0]);
         }
-        else console.log("Not added to starting: "+m[0]);
+        //else console.log("Not added to starting: "+m[0]);
     }
     
     
@@ -259,27 +261,27 @@ var moleculeListSort = function(molecules, arrows) {
             //add it
             if ((currentMoleculeIndices.indexOf(aP) == -1) && (toAddContents.indexOf(aP) == -1) && !(currentMoleculeIndices.indexOf(aR) == -1))
                 toAdd.push([aP, svgGet(aP), ind, false]);
-            else
-                console.log("Arrow product "+aP+" is not in current list, "+s);
+            //else
+            //    console.log("Arrow product "+aP+" is not in current list, "+s);
         }
         
         if (ind > 10)
             return currentMolecules;
         
-        console.log("Re-recursing at 1+"+ind);
+        //console.log("Re-recursing at 1+"+ind);
         return rank(currentMolecules.concat(toAdd), ind+1);
     }
     
-    console.log("Starting recursion.");
+    //console.log("Starting recursion.");
     //rankedMolecules is an array of arrays: [ [idnumber, "<svg>...</svg>", distanceFromStartingMolecules], ... ]
     var rankedMolecules = rank(startingMolecules, 1);
-    console.log("Ended recursion.");
+    //console.log("Ended recursion.");
     
-    console.log("Intermediate molecule len: "+String(rankedMolecules.length));
+    //console.log("Intermediate molecule len: "+String(rankedMolecules.length));
     s = "";
     for (var i = 0; i<rankedMolecules.length; i++)
         s += rankedMolecules[i][0] + ", " + rankedMolecules[i][2] + "\n";
-    console.log(s); 
+    //console.log(s); 
        
     //Iterate through the list, assigning nodes to vertical columns
     //Produce the final list.
@@ -291,11 +293,11 @@ var moleculeListSort = function(molecules, arrows) {
         alsoToAdd = [];
         for(var j = 0; j < rankedMolecules.length; j++) {
             if (rankedMolecules[j][2] == i) {
-                console.log("...");
-                console.log(rankedMolecules[j]);
+                //console.log("...");
+                //console.log(rankedMolecules[j]);
                 alsoToAdd.push(rankedMolecules[j]);
-                console.log("!!!");
-                console.log(alsoToAdd);
+                //console.log("!!!");
+                //console.log(alsoToAdd);
             }
         }
         
@@ -342,9 +344,9 @@ var moleculeListSort = function(molecules, arrows) {
         output.push(finalToAdd);
     }
     
-    console.log("Finit molecule height: "+String(output.length));
-    for(var i = 0; i<output.length; i++)
-        console.log("Row length: "+String(output[i].length));
+    //console.log("Finit molecule height: "+String(output.length));
+    //for(var i = 0; i<output.length; i++)
+        //console.log("Row length: "+String(output[i].length));
     
     
     
@@ -365,14 +367,14 @@ var drawArrows = function(arrows) {
         try {
         jsPlumb.setSuspendDrawing(true);
         } catch(e) {
-        console.log("ERROR 52");
+        //console.log("ERROR 52");
         }
         for (var i = 0; i < arrows.length; i++) {
             try {
             molecule1 = document.getElementById(String(arrows[i][0]));
             molecule2 = document.getElementById(String(arrows[i][1]));
             } catch(e) {
-            console.log("ERROR 53");
+            //console.log("ERROR 53");
             }
             try {
             var conn = jsPlumb.connect({
@@ -391,15 +393,15 @@ var drawArrows = function(arrows) {
                 endpoint:["Dot", {radius:1}],
             });
             } catch(e) {
-            console.log("ERROR 54");
+            //console.log("ERROR 54");
             }
-            //console.log("...");
+            ////console.log("...");
             //conn.getOverlay("label").setLabel(conn.getParameters().reagents);
         }
         try {
         jsPlumb.setSuspendDrawing(false);
         } catch(e) {
-        console.log("ERROR 55");
+        //console.log("ERROR 55");
         }
     });
 }
@@ -421,12 +423,14 @@ function extractLast( term ) {
 function allSetup() {
     try {
         jsPlumb.bind("ready", function() {
+        
+            $(".helperPopup").draggable();
             
             $('#leftbar').scroll(function () {
                 try {
                     jsPlumb.repaintEverything();
                 } catch(e) {
-                    console.log("ERROR! 43 In jsPlumb.repaintEverything");
+                    //console.log("ERROR! 43 In jsPlumb.repaintEverything");
                 }
             });
 
@@ -445,11 +449,11 @@ function allSetup() {
                     Anchors : [ "TopCenter", "BottomCenter" ]
                 });
             } catch(e) {
-                console.log("ERROR! 43 In jsPlumb.importDefaults;");
+                //console.log("ERROR! 43 In jsPlumb.importDefaults;");
             }
         });
     } catch(e) {
-        console.log("ERROR! In allSetup() ???");
+        //console.log("ERROR! In allSetup() ???");
     }
     
     //On resize, recalculate the two div heights.
@@ -564,8 +568,11 @@ function updateBigMolecule(){
                 return
             }
             out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
+            image = "<img src=\"https://felixsun.scripts.mit.edu/orgo/static/x.png\" style=\"position:absolute;\"></img>";
             $(bigSelector).css('left', '400px');
+            out = image + out;
             $(bigSelector).html(out);
+            moleculeVisible = true;
 
         });
     });

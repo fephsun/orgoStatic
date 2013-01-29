@@ -4,13 +4,21 @@ var jq = jQuery.noConflict();
 
 var isSuccess = false;
 
+var moleculeVisible = false;
+
 function setup(typeableReagents) {
     //For making molecules and reactions draggable
     //$( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100});
     //$( ".reaction" ).draggable({helper: "clone", revert:true, revertDuration: 100});
     $( ".reagent" ).draggable({helper: "clone", revert:true, revertDuration: 100});
     
+    isSuccess = false;
+    moleculeVisible = false;
+    
+    $(".helperPopup").draggable();
+    
     $("#leftbar").droppable({
+        accept: '.reagent',
         drop: function(event, ui) {
             if (tutorial == 2) {
                 tutorial = 3;
@@ -122,7 +130,7 @@ function setup(typeableReagents) {
     $("#bigMolecule").each(function(){
         $(this).click(function(){
             $(this).css("left", "-9999px");
-
+            moleculeVisible = false;
         });
     });
     
@@ -145,13 +153,16 @@ function updateBigMolecule(){
         $(this).click(function(){
             //What happens when mouse enters area
             //Wait for a few seconds, then show the big molecule
-            if ($(this).html().length < 5){
+            if ($(this).html().length < 6){
                 //Sorta hackish way of testing whether anything is in the molecule div
                 return
             }
             out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
+            image = "<img src=\"https://felixsun.scripts.mit.edu/orgo/static/x.png\" style=\"position:absolute;\"></img>";
             $(bigSelector).css('left', '400px');
+            out = image + out;
             $(bigSelector).html(out);
+            moleculeVisible = true;
 
         });
     });
